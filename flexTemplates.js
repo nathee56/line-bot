@@ -208,8 +208,7 @@ function createGeneralResponseFlex(text) {
                     backgroundColor: "#11998e",
                     paddingAll: "sm",
                     cornerRadius: "md",
-                    width: "70px",
-                    alignItems: "center"
+                    width: "70px"
                 },
                 {
                     type: "text",
