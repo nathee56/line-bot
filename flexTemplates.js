@@ -1,3 +1,5 @@
+const CHICK_ICON = "https://cdn-icons-png.flaticon.com/512/2663/2663067.png"; // รูปน้องไก่น่ารัก
+
 function createTaskFlex(title, deadline) {
     return {
         type: "bubble",
@@ -7,14 +9,24 @@ function createTaskFlex(title, deadline) {
             layout: "vertical",
             contents: [
                 {
+                    type: "image",
+                    url: CHICK_ICON,
+                    position: "absolute",
+                    offsetEnd: "-10px",
+                    offsetTop: "-10px",
+                    size: "xs",
+                    aspectMode: "fit"
+                },
+                {
                     type: "text",
-                    text: "บันทึกงานใหม่สำเร็จ! 📝",
+                    text: "บันทึกงานสำเร็จ! ✨",
                     weight: "bold",
                     color: "#FFFFFF",
                     size: "md"
                 }
             ],
-            backgroundColor: "#4B6CB7"
+            backgroundColor: "#FF8C2A",
+            paddingAll: "xl"
         },
         body: {
             type: "box",
@@ -26,7 +38,7 @@ function createTaskFlex(title, deadline) {
                     weight: "bold",
                     size: "xl",
                     wrap: true,
-                    margin: "md"
+                    color: "#333333"
                 },
                 {
                     type: "box",
@@ -41,7 +53,7 @@ function createTaskFlex(title, deadline) {
                             contents: [
                                 {
                                     type: "text",
-                                    text: "กำหนดส่ง:",
+                                    text: "🕒 กำหนดส่ง:",
                                     color: "#aaaaaa",
                                     size: "sm",
                                     flex: 2
@@ -52,30 +64,36 @@ function createTaskFlex(title, deadline) {
                                     wrap: true,
                                     color: "#666666",
                                     size: "sm",
-                                    flex: 5
+                                    flex: 4
                                 }
                             ]
                         }
                     ]
                 }
-            ]
+            ],
+            paddingAll: "xl"
         },
         footer: {
             type: "box",
             layout: "vertical",
             contents: [
                 {
-                    type: "text",
-                    text: "ฉันจะแจ้งเตือนคุณเมื่อใกล้ถึงเวลาค่ะ",
-                    size: "xs",
-                    color: "#999999",
-                    align: "center"
+                    type: "button",
+                    action: {
+                        type: "message",
+                        label: "ดูงานทั้งหมด",
+                        text: "ขอดูรายการงานทั้งหมด"
+                    },
+                    style: "secondary",
+                    color: "#FFF7ED",
+                    height: "sm"
                 }
-            ]
+            ],
+            paddingAll: "md"
         },
         styles: {
-            header: {
-                backgroundColor: "#4B6CB7"
+            footer: {
+                separator: true
             }
         }
     };
@@ -88,21 +106,38 @@ function createTaskListFlex(tasks) {
         margin: "md",
         contents: [
             {
-                type: "text",
-                text: t.title,
-                weight: "bold",
-                size: "sm",
-                wrap: true
+                type: "box",
+                layout: "horizontal",
+                contents: [
+                    {
+                        type: "text",
+                        text: "✅",
+                        size: "xs",
+                        flex: 0,
+                        margin: "xs"
+                    },
+                    {
+                        type: "text",
+                        text: t.title,
+                        weight: "bold",
+                        size: "sm",
+                        wrap: true,
+                        flex: 5
+                    }
+                ]
             },
             {
                 type: "text",
-                text: `📅 ${t.deadline}`,
+                text: `🕒 ${t.deadline}`,
                 size: "xs",
-                color: "#999999"
+                color: "#999999",
+                margin: "sm",
+                paddingStart: "xxl"
             },
             {
                 type: "separator",
-                margin: "sm"
+                margin: "md",
+                color: "#eeeeee"
             }
         ]
     }));
@@ -117,10 +152,11 @@ function createTaskListFlex(tasks) {
                     type: "text",
                     text: "รายการงานของคุณ 📋",
                     weight: "bold",
-                    color: "#FFFFFF"
+                    color: "#FFFFFF",
+                    align: "center"
                 }
             ],
-            backgroundColor: "#182848"
+            backgroundColor: "#2C3E50"
         },
         body: {
             type: "box",
@@ -128,12 +164,13 @@ function createTaskListFlex(tasks) {
             contents: taskItems.length > 0 ? taskItems : [
                 {
                     type: "text",
-                    text: "ไม่มีงานที่ค้างอยู่ค่ะ",
+                    text: "ไม่มีงานค้างเลย เก่งมาก! 🎉",
                     align: "center",
                     color: "#aaaaaa",
                     margin: "xl"
                 }
-            ]
+            ],
+            paddingAll: "xl"
         }
     };
 }
@@ -147,13 +184,22 @@ function createNotificationFlex(title, deadline, timeRemaining) {
             layout: "vertical",
             contents: [
                 {
+                    type: "image",
+                    url: "https://cdn-icons-png.flaticon.com/512/564/564619.png", // รูปแจ้งเตือนด่วน
+                    position: "absolute",
+                    offsetEnd: "0px",
+                    offsetTop: "0px",
+                    size: "xs"
+                },
+                {
                     type: "text",
-                    text: isUrgent ? "⚠️ แจ้งเตือนด่วน!" : "🔔 แจ้งเตือนงาน",
+                    text: isUrgent ? "⚠️ งานด่วนมาก!" : "🔔 อย่าลืมนะ!",
                     weight: "bold",
                     color: "#FFFFFF"
                 }
             ],
-            backgroundColor: isUrgent ? "#FF4B2B" : "#F7971E"
+            backgroundColor: isUrgent ? "#EF4444" : "#F59E0B",
+            paddingAll: "xl"
         },
         body: {
             type: "box",
@@ -169,10 +215,14 @@ function createNotificationFlex(title, deadline, timeRemaining) {
                 {
                     type: "text",
                     text: `ครบกำหนดในอีก ${timeRemaining}`,
-                    size: "sm",
-                    color: "#FF4B2B",
+                    size: "md",
+                    color: "#EF4444",
                     margin: "sm",
                     weight: "bold"
+                },
+                {
+                    type: "separator",
+                    margin: "md"
                 },
                 {
                     type: "text",
@@ -180,6 +230,23 @@ function createNotificationFlex(title, deadline, timeRemaining) {
                     size: "xs",
                     color: "#999999",
                     margin: "md"
+                }
+            ],
+            paddingAll: "xl"
+        },
+        footer: {
+            type: "box",
+            layout: "vertical",
+            contents: [
+                {
+                    type: "button",
+                    action: {
+                        type: "message",
+                        label: "จัดการตอนนี้เลย",
+                        text: `จัดการงาน ${title}`
+                    },
+                    style: "primary",
+                    color: isUrgent ? "#EF4444" : "#F59E0B"
                 }
             ]
         }
@@ -195,26 +262,31 @@ function createGeneralResponseFlex(text) {
             contents: [
                 {
                     type: "box",
-                    layout: "vertical",
+                    layout: "horizontal",
                     contents: [
                         {
+                            type: "image",
+                            url: CHICK_ICON,
+                            size: "xxs",
+                            flex: 0,
+                            aspectMode: "fit"
+                        },
+                        {
                             type: "text",
-                            text: "Assistant",
-                            color: "#FFFFFF",
+                            text: "Chicku Assistant",
                             size: "xs",
-                            weight: "bold"
+                            weight: "bold",
+                            color: "#FF8C2A",
+                            margin: "sm",
+                            gravity: "center"
                         }
                     ],
-                    backgroundColor: "#11998e",
-                    paddingAll: "sm",
-                    cornerRadius: "md",
-                    width: "70px"
+                    marginBottom: "md"
                 },
                 {
                     type: "text",
                     text: text,
                     wrap: true,
-                    margin: "md",
                     size: "md",
                     color: "#333333"
                 }
@@ -223,7 +295,7 @@ function createGeneralResponseFlex(text) {
         },
         styles: {
             body: {
-                backgroundColor: "#f9f9f9"
+                backgroundColor: "#FFF7ED"
             }
         }
     };
