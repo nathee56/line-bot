@@ -269,6 +269,14 @@
             fetchSchedule();
         });
 
+        // Hide Navbar when typing
+        const navBar = document.querySelector('.nav-bar');
+        const inputs = document.querySelectorAll('input, textarea, select');
+        inputs.forEach(input => {
+            input.addEventListener('focus', () => navBar.style.display = 'none');
+            input.addEventListener('blur', () => navBar.style.display = 'flex');
+        });
+
         setInterval(updateCountdown, 60000);
         initLiff();
     </script>
