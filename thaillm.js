@@ -1,18 +1,9 @@
-const { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } = require("@google/generative-ai");
+const OpenAI = require("openai");
 require('dotenv').config();
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ 
-    model: "gemini-1.5-flash-latest",
-    generationConfig: {
-        responseMimeType: "application/json",
-    },
-    safetySettings: [
-        { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE },
-        { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_NONE },
-        { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_NONE },
-        { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_NONE },
-    ]
+const openai = new OpenAI({
+    apiKey: process.env.GROQ_API_KEY,
+    baseURL: "https://api.groq.com/openai/v1",
 });
 
 const systemPrompt = `
@@ -33,7 +24,7 @@ Guidelines:
 4. For 'general':
    - Provide a polite 'reply' in Thai.
 
-Output Format (JSON only):
+Output Format (STRICT JSON ONLY):
 {
   "intent": "add_task" | "mark_done" | "list_tasks" | "general",
   "task": "string",
@@ -45,17 +36,21 @@ Output Format (JSON only):
 
 async function askAI(userPrompt) {
     try {
-        const result = await model.generateContent([systemPrompt, userPrompt]);
-        const response = await result.response;
-        const text = response.text();
-        if (!text) throw new Error('Empty response from Gemini');
-        return text;
+        const response = await openai.chat.completions.create({
+            model: "llama-3.1-70b-versatile",
+            messages: [
+                { role: "system", content: systemPrompt },
+                { role: "user", content: userPrompt }
+            ],
+            response_format: { type: "json_object" }
+        });
+
+        return response.choices[0].message.content;
     } catch (error) {
-        console.error('Gemini API Error:', error);
-        // Fallback for UI if AI fails
+        console.error('Groq API Error:', error);
         return JSON.stringify({ 
             intent: 'general', 
-            reply: 'ขออภัยค่ะ ระบบประมวลผลขัดข้องชั่วคราว ลองพิมพ์ใหม่อีกครั้งนะคะ (Error: ' + (error.message || 'Unknown') + ')' 
+            reply: 'ขออภัยค่ะ Chicku มีปัญหาในการประมวลผลชั่วคราว ลองใหม่อีกครั้งนะคะ' 
         });
     }
 }
