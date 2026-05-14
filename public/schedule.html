@@ -95,6 +95,12 @@
 </head>
 <body>
 
+    <!-- Full Page Loader -->
+    <div class="loader-overlay" id="global-loader">
+        <img src="https://cdn-icons-png.flaticon.com/512/2663/2663067.png" alt="Chicku" class="mascot-img">
+        <div class="loader-text">กำลังโหลด...</div>
+    </div>
+
     <div class="container">
         <div class="mascot-container animate-fade-up">
             <img src="https://cdn-icons-png.flaticon.com/512/2663/2663067.png" alt="Chicku" class="mascot-img">
@@ -231,6 +237,8 @@
                 updateCountdown();
             } catch (error) {
                 console.error(error);
+            } finally {
+                document.getElementById('global-loader').classList.add('hide-loader');
             }
         }
 
