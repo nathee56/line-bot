@@ -118,7 +118,7 @@ function createTaskListFlex(tasks) {
                     },
                     {
                         type: "text",
-                        text: t.title,
+                        text: t.title || "(ไม่มีหัวข้อ)",
                         weight: "bold",
                         size: "sm",
                         wrap: true,
@@ -280,11 +280,11 @@ function createGeneralResponseFlex(text) {
                             gravity: "center"
                         }
                     ],
-                    marginBottom: "md"
+                    margin: "md"
                 },
                 {
                     type: "text",
-                    text: text,
+                    text: text || "...",
                     wrap: true,
                     size: "md",
                     color: "#333333"
