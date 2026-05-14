@@ -556,7 +556,8 @@ function createSummaryDashboardFlex(doneCount, pendingCount) {
                                     layout: "vertical",
                                     backgroundColor: "#FF8C2A",
                                     width: `${progress}%`,
-                                    height: "6px"
+                                    height: "6px",
+                                    contents: []
                                 }
                             ]
                         }
