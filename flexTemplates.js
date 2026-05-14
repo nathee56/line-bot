@@ -279,8 +279,7 @@ function createGeneralResponseFlex(text) {
                             margin: "sm",
                             gravity: "center"
                         }
-                    ],
-                    margin: "md"
+                    ]
                 },
                 {
                     type: "text",
