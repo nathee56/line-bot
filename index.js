@@ -6,6 +6,8 @@ require('dotenv').config();
 const { handleMessage } = require('./lineHandler');
 const { startScheduler } = require('./scheduler');
 const { getTasks, saveTask, markDone, deleteTask, getSchedule, saveSchedule, deleteSchedule } = require('./firebase');
+const { pushFlexMessage, pushMessage } = require('./lineClient');
+const { taskAddedCard, scheduleCard } = require('./flexTemplates');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -74,6 +76,10 @@ app.post('/api/tasks', async (req, res) => {
         if (!userId || !title) return res.status(400).json({ error: 'userId and title are required' });
         
         await saveTask(userId, { title, deadline, priority });
+        
+        // ส่งการแจ้งเตือนไปยัง LINE
+        await pushFlexMessage(userId, "🐥 บันทึกงานใหม่จาก Dashboard แล้วจ้า!", taskAddedCard({ title, deadline, priority }));
+        
         res.status(201).json({ success: true });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -118,6 +124,11 @@ app.post('/api/schedule', async (req, res) => {
         if (!userId || !day || !startTime || !subject) return res.status(400).json({ error: 'Missing required fields' });
         
         await saveSchedule(userId, { day, startTime, endTime, subject, room });
+        
+        // ส่งการแจ้งเตือนไปยัง LINE (แบบข้อความธรรมดาก็ได้)
+        const daysMap = { 1: "จันทร์", 2: "อังคาร", 3: "พุธ", 4: "พฤหัสบดี", 5: "ศุกร์", 6: "เสาร์", 7: "อาทิตย์" };
+        await pushMessage(userId, `📅 บันทึกวิชาเรียนใหม่: ${subject}\nวัน${daysMap[day]} เวลา ${startTime} - ${endTime} เรียบร้อยแล้วจ้า! 🐥`);
+        
         res.status(201).json({ success: true });
     } catch (error) {
         res.status(500).json({ error: error.message });
