@@ -3,69 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>เพิ่มงานใหม่ 🐥</title>
+    <title>New Task</title>
     <link rel="stylesheet" href="styles.css">
     <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 </head>
 <body>
 
-    <!-- Full Page Loader -->
     <div class="loader-overlay" id="global-loader">
         <img src="chicku-mascot.png" alt="Chicku" class="mascot-img">
-        <div class="loader-text">กำลังโหลด...</div>
     </div>
 
-    <!-- Success Overlay -->
+    <!-- Minimal Success Overlay -->
     <div class="overlay" id="success-overlay">
         <div class="popup-card">
-            <img src="chicku-mascot.png" width="80" class="mascot-img"><br><br>
-            <h2 class="text-primary">✅ Chicku จดให้แล้ว!</h2>
-            <p class="text-muted">กำลังพากลับหน้าหลัก...</p>
+            <h2 class="title-xl">Task Saved</h2>
+            <p class="subtitle">Chicku will remind you soon 🐥</p>
         </div>
     </div>
 
     <div class="container">
-        <div class="mascot-container animate-fade-up">
+        <div class="mascot-container">
             <img src="chicku-mascot.png" alt="Chicku" class="mascot-img">
-            <h2 class="text-primary mt-1">เพิ่มงานใหม่</h2>
-            <p class="text-muted">บอก Chicku ว่ามีงานอะไร! 🐥</p>
+            <h1 class="title-xl">New Task</h1>
+            <p class="subtitle">Tell Chicku what to remember</p>
         </div>
 
-        <div class="card animate-fade-up delay-1">
-            <form id="add-task-form">
-                <div class="form-group">
-                    <label class="form-label">📝 ชื่องาน</label>
-                    <input type="text" id="title" class="form-control" placeholder="เช่น ส่งรายงาน, ทำการบ้าน..." required>
-                </div>
+        <form id="add-task-form">
+            <div class="form-group">
+                <label class="form-label">Task Name</label>
+                <input type="text" id="title" class="form-control" placeholder="e.g., Design Review" required>
+            </div>
 
-                <div class="form-group">
-                    <label class="form-label">📅 กำหนดส่ง</label>
-                    <input type="datetime-local" id="deadline" class="form-control">
-                </div>
+            <div class="form-group">
+                <label class="form-label">Deadline</label>
+                <input type="datetime-local" id="deadline" class="form-control">
+            </div>
 
-                <div class="form-group">
-                    <label class="form-label">ความด่วน</label>
-                    <div class="priority-selector" id="priority-selector">
-                        <button type="button" class="priority-btn" data-priority="urgent">🔴 ด่วนมาก</button>
-                        <button type="button" class="priority-btn active" data-priority="normal">🟡 ปานกลาง</button>
-                        <button type="button" class="priority-btn" data-priority="low">🟢 ปกติ</button>
-                    </div>
-                    <input type="hidden" id="priority" value="ปกติ">
+            <div class="form-group">
+                <label class="form-label">Priority</label>
+                <div class="priority-selector">
+                    <div class="priority-option" data-priority="urgent">Urgent</div>
+                    <div class="priority-option active" data-priority="normal">Normal</div>
+                    <div class="priority-option" data-priority="low">Low</div>
                 </div>
+                <input type="hidden" id="priority" value="ปกติ">
+            </div>
 
-                <div class="form-group">
-                    <label class="form-label">💬 หมายเหตุ (ถ้ามี)</label>
-                    <textarea id="note" class="form-control" rows="3" placeholder="เพิ่มรายละเอียดเพิ่มเติม..."></textarea>
-                </div>
+            <div class="form-group">
+                <label class="form-label">Notes (Optional)</label>
+                <textarea id="note" class="form-control" rows="2" style="resize: none;" placeholder="Details..."></textarea>
+            </div>
 
-                <button type="submit" class="btn btn-primary mt-1">
-                    🐥 ให้ Chicku จดให้!
-                </button>
-            </form>
-        </div>
+            <button type="submit" class="btn btn-primary" style="margin-top: 40px;">
+                Save Task
+            </button>
+        </form>
     </div>
 
-    <!-- Bottom Navigation -->
     <div class="nav-bar">
         <a href="index.html" class="nav-item" id="nav-dashboard">
             <span class="nav-icon">📊</span>
@@ -73,11 +67,11 @@
         </a>
         <a href="add-task.html" class="nav-item active" id="nav-add">
             <span class="nav-icon">➕</span>
-            เพิ่มงาน
+            Add
         </a>
         <a href="schedule.html" class="nav-item" id="nav-schedule">
             <span class="nav-icon">📅</span>
-            ตารางเรียน
+            Schedule
         </a>
     </div>
 
@@ -113,13 +107,13 @@
             document.getElementById('nav-schedule').href = `schedule.html?userId=${userId}`;
         }
 
-        // Priority Selector Logic
-        document.querySelectorAll('.priority-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.priority-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
+        // Minimal Priority Selector
+        document.querySelectorAll('.priority-option').forEach(opt => {
+            opt.addEventListener('click', () => {
+                document.querySelectorAll('.priority-option').forEach(o => o.classList.remove('active'));
+                opt.classList.add('active');
                 
-                const p = btn.getAttribute('data-priority');
+                const p = opt.getAttribute('data-priority');
                 selectedPriority = p === 'urgent' ? 'ด่วนมาก' : (p === 'normal' ? 'ปกติ' : 'ต่ำ');
                 document.getElementById('priority').value = selectedPriority;
             });
@@ -127,7 +121,7 @@
 
         document.getElementById('add-task-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (!userId) return alert('ไม่พบข้อมูลผู้ใช้');
+            if (!userId) return;
 
             const taskData = {
                 title: document.getElementById('title').value,
@@ -152,12 +146,8 @@
                             window.location.href = `index.html?userId=${userId}`;
                         }
                     }, 1500);
-                } else {
-                    alert('เกิดข้อผิดพลาด');
                 }
-            } catch (error) {
-                alert('เกิดข้อผิดพลาดในการเชื่อมต่อ');
-            }
+            } catch (error) {}
         });
 
         initLiff();

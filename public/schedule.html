@@ -3,158 +3,117 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ตารางเรียน 🐥</title>
+    <title>Schedule</title>
     <link rel="stylesheet" href="styles.css">
     <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <style>
-        .tabs {
-            display: flex;
-            background: rgba(255, 255, 255, 0.5);
-            padding: 5px;
-            border-radius: 20px;
-            margin-bottom: 20px;
-            overflow-x: auto;
-            gap: 5px;
-        }
-        .tab-item {
-            flex: 1;
-            padding: 10px 5px;
-            text-align: center;
-            border-radius: 15px;
-            font-size: 13px;
-            font-weight: 800;
-            cursor: pointer;
-            min-width: 45px;
-            transition: all 0.2s;
-            color: var(--text-muted);
-        }
-        .tab-item.active {
-            background: var(--primary);
-            color: white;
-            box-shadow: 0 4px 10px rgba(255, 140, 0, 0.3);
-        }
-        .class-card {
-            background: white;
-            border-radius: 22px;
-            padding: 15px;
-            margin-bottom: 12px;
-            box-shadow: var(--shadow);
+        .class-row {
+            padding: 24px 0;
+            border-bottom: 1px solid var(--border-color);
             display: flex;
             align-items: center;
-            gap: 15px;
-            border-left: 6px solid var(--primary);
-            transition: all 0.3s;
-        }
-        .class-card.upcoming {
-            background: #FFFBEB;
-            border-color: var(--warning);
-            transform: scale(1.02);
+            gap: 20px;
         }
         .class-time {
-            font-size: 13px;
-            font-weight: 800;
-            color: var(--primary);
-            width: 80px;
+            font-size: 14px;
+            font-weight: 700;
+            width: 90px;
         }
-        .class-info { flex: 1; }
-        .class-subject { font-size: 16px; font-weight: 800; }
-        .class-room { font-size: 12px; color: var(--text-muted); }
-
+        .class-details { flex: 1; }
+        .class-subject { font-size: 17px; font-weight: 600; }
+        .class-room { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+        
         .modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
+            background: rgba(255, 255, 255, 0.95);
             display: none; justify-content: center; align-items: center;
-            z-index: 2000; padding: 20px;
+            z-index: 2000; padding: 24px;
         }
     </style>
 </head>
 <body>
 
-    <!-- Full Page Loader -->
     <div class="loader-overlay" id="global-loader">
         <img src="chicku-mascot.png" alt="Chicku" class="mascot-img">
-        <div class="loader-text">กำลังโหลด...</div>
     </div>
 
     <div class="container">
-        <!-- Header -->
-        <div class="mascot-container animate-fade-up">
-            <h2 class="text-primary">📅 ตารางเรียน</h2>
-            <p class="text-muted">วันนี้มีเรียนอะไรบ้าง? 🐥</p>
+        <!-- Minimal Header -->
+        <div class="mascot-container">
+            <h1 class="title-xl">Schedule</h1>
+            <p class="subtitle">What's on today? 🐥</p>
         </div>
 
-        <!-- Next Class Countdown -->
-        <div id="countdown-card" class="card animate-fade-up delay-1" style="background: linear-gradient(45deg, var(--primary), #FFA500); color: white; text-align: center;">
-            <p style="font-size: 14px; opacity: 0.9; font-weight: 600;">🐥 คาบถัดไป: <span id="next-subject">---</span></p>
-            <h1 id="cd-timer" style="font-size: 32px; margin: 10px 0;">-- ชม. -- น.</h1>
-            <p id="next-room" style="font-size: 12px; opacity: 0.8;"></p>
+        <!-- Minimal Countdown -->
+        <div id="countdown-area" style="text-align: center; margin-bottom: 50px;">
+            <p class="subtitle" style="text-transform: uppercase; letter-spacing: 1px;">Next Class</p>
+            <h2 id="next-subject" style="font-size: 24px; margin: 8px 0;">---</h2>
+            <p id="cd-timer" style="font-size: 16px; font-weight: 600; color: var(--primary);">--h --m left</p>
         </div>
 
-        <!-- Day Tabs -->
-        <div class="tabs animate-fade-up delay-2" id="day-tabs">
-            <div class="tab-item" onclick="changeDay(1)">จ</div>
-            <div class="tab-item" onclick="changeDay(2)">อ</div>
-            <div class="tab-item" onclick="changeDay(3)">พ</div>
-            <div class="tab-item" onclick="changeDay(4)">พฤ</div>
-            <div class="tab-item" onclick="changeDay(5)">ศ</div>
-            <div class="tab-item" onclick="changeDay(6)">ส</div>
-            <div class="tab-item" onclick="changeDay(7)">อา</div>
+        <!-- Text-based Day Tabs -->
+        <div class="tabs" id="day-tabs">
+            <div class="tab-item" onclick="changeDay(1)">Mon</div>
+            <div class="tab-item" onclick="changeDay(2)">Tue</div>
+            <div class="tab-item" onclick="changeDay(3)">Wed</div>
+            <div class="tab-item" onclick="changeDay(4)">Thu</div>
+            <div class="tab-item" onclick="changeDay(5)">Fri</div>
+            <div class="tab-item" onclick="changeDay(6)">Sat</div>
+            <div class="tab-item" onclick="changeDay(7)">Sun</div>
         </div>
 
-        <!-- Schedule List -->
-        <div id="schedule-list" class="animate-fade-up delay-3">
+        <div id="schedule-list">
             <!-- Items rendered here -->
         </div>
 
-        <button class="btn btn-primary mt-1 animate-fade-up delay-4" onclick="openModal()">
-            ➕ เพิ่มวิชาเรียน
+        <button class="btn btn-outline" style="margin-top: 40px;" onclick="openModal()">
+            Add Class
         </button>
     </div>
 
-    <!-- Modal Form -->
+    <!-- Modal Form - Full screen clean -->
     <div class="modal" id="addModal">
-        <div class="card" style="width: 100%; max-width: 400px;">
-            <h3 class="mb-2">➕ เพิ่มวิชาเรียน</h3>
+        <div style="width: 100%; max-width: 400px;">
+            <h2 class="title-xl mb-2" style="text-align: center;">New Class</h2>
             <form id="add-schedule-form">
                 <div class="form-group">
-                    <label class="form-label">วันเรียน</label>
+                    <label class="form-label">Day</label>
                     <select id="day" class="form-control">
-                        <option value="1">วันจันทร์</option>
-                        <option value="2">วันอังคาร</option>
-                        <option value="3">วันพุธ</option>
-                        <option value="4">วันพฤหัสบดี</option>
-                        <option value="5">วันศุกร์</option>
-                        <option value="6">วันเสาร์</option>
-                        <option value="7">วันอาทิตย์</option>
+                        <option value="1">Monday</option>
+                        <option value="2">Tuesday</option>
+                        <option value="3">Wednesday</option>
+                        <option value="4">Thursday</option>
+                        <option value="5">Friday</option>
+                        <option value="6">Saturday</option>
+                        <option value="7">Sunday</option>
                     </select>
                 </div>
-                <div style="display: flex; gap: 10px;">
+                <div style="display: flex; gap: 20px;">
                     <div class="form-group" style="flex: 1;">
-                        <label class="form-label">เวลาเริ่ม</label>
+                        <label class="form-label">Starts</label>
                         <input type="time" id="startTime" class="form-control" required>
                     </div>
                     <div class="form-group" style="flex: 1;">
-                        <label class="form-label">เวลาจบ</label>
+                        <label class="form-label">Ends</label>
                         <input type="time" id="endTime" class="form-control" required>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">ชื่อวิชา</label>
-                    <input type="text" id="subject" class="form-control" placeholder="เช่น English 101" required>
+                    <label class="form-label">Subject</label>
+                    <input type="text" id="subject" class="form-control" placeholder="e.g., Computer Science" required>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">ห้องเรียน</label>
-                    <input type="text" id="room" class="form-control" placeholder="เช่น Lab 401">
+                    <label class="form-label">Room</label>
+                    <input type="text" id="room" class="form-control" placeholder="e.g., Hall 1">
                 </div>
-                <div style="display: flex; gap: 10px; margin-top: 20px;">
-                    <button type="button" class="btn" style="background: #EEE; flex: 1;" onclick="closeModal()">ยกเลิก</button>
-                    <button type="submit" class="btn btn-primary" style="flex: 2;">🐥 บันทึก</button>
+                <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 30px;">
+                    <button type="submit" class="btn btn-primary">Save Class</button>
+                    <button type="button" class="btn btn-ghost-danger" onclick="closeModal()">Cancel</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Bottom Navigation -->
     <div class="nav-bar">
         <a href="index.html" class="nav-item" id="nav-dashboard">
             <span class="nav-icon">📊</span>
@@ -162,11 +121,11 @@
         </a>
         <a href="add-task.html" class="nav-item" id="nav-add">
             <span class="nav-icon">➕</span>
-            เพิ่มงาน
+            Add
         </a>
         <a href="schedule.html" class="nav-item active" id="nav-schedule">
             <span class="nav-icon">📅</span>
-            ตารางเรียน
+            Schedule
         </a>
     </div>
 
@@ -210,9 +169,8 @@
                 schedules = await res.json();
                 renderSchedule();
                 updateCountdown();
-            } catch (error) {
-                console.error(error);
-            } finally {
+            } catch (error) {}
+            finally {
                 document.getElementById('global-loader').classList.add('hide-loader');
             }
         }
@@ -233,26 +191,19 @@
             daySchedules.sort((a,b) => a.startTime.localeCompare(b.startTime));
 
             if (daySchedules.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center card" style="padding: 40px; border: 2px dashed #FFDAB9; background: transparent;">
-                        <p style="color: var(--text-muted); font-weight: 600;">🐥 ไม่มีเรียนวันนี้ พักได้!</p>
-                    </div>`;
+                container.innerHTML = `<p class="text-muted" style="text-align: center; padding: 60px;">🐥 No classes today. Time to rest.</p>`;
                 return;
             }
 
-            const now = new Date();
-            const nowStr = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
-
             container.innerHTML = daySchedules.map(sch => {
-                const isUpcoming = viewDay === (new Date().getDay() === 0 ? 7 : new Date().getDay()) && sch.startTime > nowStr;
                 return `
-                    <div class="class-card ${isUpcoming ? 'upcoming' : ''}">
-                        <div class="class-time">${sch.startTime} - ${sch.endTime}</div>
-                        <div class="class-info">
+                    <div class="class-row">
+                        <div class="class-time">${sch.startTime}</div>
+                        <div class="class-details">
                             <div class="class-subject">${sch.subject}</div>
-                            <div class="class-room">📍 ${sch.room || "ไม่ระบุห้อง"}</div>
+                            <div class="class-room">${sch.room || "No room"}</div>
                         </div>
-                        <button onclick="deleteSchedule('${sch.id}')" style="border:none; background:none; font-size:16px;">🗑️</button>
+                        <button onclick="deleteSchedule('${sch.id}')" style="border:none; background:none; font-size:14px; color:var(--danger);">✕</button>
                     </div>
                 `;
             }).join('');
@@ -269,14 +220,12 @@
                 .sort((a,b) => a.startTime.localeCompare(b.startTime))[0];
 
             if (!nextClass) {
-                document.getElementById('next-subject').innerText = "หมดคาบแล้ววันนี้!";
+                document.getElementById('next-subject').innerText = "All done for today";
                 document.getElementById('cd-timer').innerText = "🐥";
-                document.getElementById('next-room').innerText = "พักผ่อนเยอะๆ นะคะ";
                 return;
             }
 
             document.getElementById('next-subject').innerText = nextClass.subject;
-            document.getElementById('next-room').innerText = `📍 ${nextClass.room || "ไม่ระบุห้อง"}`;
 
             const [h, m] = nextClass.startTime.split(':').map(Number);
             const target = new Date();
@@ -286,14 +235,13 @@
             const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
             const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
 
-            document.getElementById('cd-timer').innerText = `${diffHrs} ชม. ${diffMins} น.`;
+            document.getElementById('cd-timer').innerText = `${diffHrs}h ${diffMins}m left`;
         }
 
         function openModal() { document.getElementById('addModal').style.display = 'flex'; }
         function closeModal() { document.getElementById('addModal').style.display = 'none'; }
 
         async function deleteSchedule(id) {
-            if(!confirm('ต้องการลบวิชานี้ใช่ไหม?')) return;
             await fetch(`/api/schedule/${id}`, { method: 'DELETE' });
             fetchSchedule();
         }
