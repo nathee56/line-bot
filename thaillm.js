@@ -1,31 +1,50 @@
-const axios = require('axios');
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 require('dotenv').config();
 
-async function askAI(prompt) {
-    const apiKey = process.env.THAILLM_API_KEY;
-    const endpoint = process.env.THAILLM_ENDPOINT;
-    const model = process.env.THAILLM_MODEL;
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const model = genAI.getGenerativeModel({ 
+    model: "gemini-1.5-flash",
+    generationConfig: {
+        responseMimeType: "application/json",
+    }
+});
 
+const systemPrompt = `
+You are a professional task management assistant named "Chicku".
+Your job is to parse the user's message and return a structured JSON response.
+
+Guidelines:
+1. Identify the intent:
+   - 'add_task': User wants to save a new task.
+   - 'mark_done': User wants to mark a task as completed.
+   - 'list_tasks': User wants to see their tasks.
+   - 'general': General conversation or questions.
+2. For 'add_task':
+   - Extract 'task' (the title/description).
+   - Extract 'deadline' (ISO 8601 string or human-readable Thai/English).
+3. For 'mark_done':
+   - Extract 'doneId' (the index or ID mentioned).
+4. For 'general':
+   - Provide a polite 'reply' in Thai.
+
+Output Format (JSON only):
+{
+  "intent": "add_task" | "mark_done" | "list_tasks" | "general",
+  "task": "string",
+  "deadline": "string",
+  "doneId": "string",
+  "reply": "string"
+}
+`;
+
+async function askAI(userPrompt) {
     try {
-        const response = await axios.post(endpoint, {
-            model: model,
-            messages: [
-                { role: 'system', content: 'You are a task management assistant. Analyze the user intent. If they want to add a task, provide title and deadline (YYYY-MM-DD HH:mm). If they want to mark a task as done, provide the doneId. Return ONLY JSON format: {"intent": "add_task"|"mark_done"|"other", "task": {"title": "...", "deadline": "..."}, "doneId": "...", "reply": "..."}' },
-                { role: 'user', content: prompt }
-            ],
-            temperature: 0.3
-        }, {
-            headers: {
-                'Authorization': `Bearer ${apiKey}`,
-                'Content-Type': 'application/json'
-            }
-        });
-
-        const content = response.data.choices?.[0]?.message?.content || response.data.result || "";
-        return content;
+        const result = await model.generateContent([systemPrompt, userPrompt]);
+        const response = await result.response;
+        return response.text();
     } catch (error) {
-        console.error('Error in askAI:', error.response ? error.response.data : error.message);
-        return "";
+        console.error('Gemini API Error:', error);
+        return JSON.stringify({ intent: 'general', reply: 'ขออภัยค่ะ Chicku เกิดข้อผิดพลาดในการเชื่อมต่อกับสมองกล ลองใหม่อีกครั้งนะคะ' });
     }
 }
 
