@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ตารางเรียน - Chicku Dashboard</title>
     <link rel="stylesheet" href="styles.css">
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <style>
         .day-section {
             margin-bottom: 20px;
@@ -59,7 +60,6 @@
             text-align: right;
         }
         
-        /* Modal for adding class */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -109,7 +109,6 @@
         </div>
     </div>
 
-    <!-- Add Schedule Modal -->
     <div class="modal-overlay" id="addModal">
         <div class="modal-content">
             <h3 class="mb-2">เพิ่มวิชาเรียนใหม่</h3>
@@ -172,18 +171,41 @@
     </div>
 
     <script>
-        const userId = localStorage.getItem('chicku_userId') || 'test_user_123';
-        
-        document.getElementById('nav-dashboard').href = `index.html?userId=${userId}`;
-        document.getElementById('nav-add').href = `add-task.html?userId=${userId}`;
-        document.getElementById('nav-schedule').href = `schedule.html?userId=${userId}`;
+        let userId = '';
+        let schedules = [];
+
+        async function initLiff() {
+            try {
+                await liff.init({ liffId: "YOUR_LIFF_ID" }); 
+                if (liff.isLoggedIn()) {
+                    const profile = await liff.getProfile();
+                    userId = profile.userId;
+                } else {
+                    liff.login();
+                }
+            } catch (err) {
+                console.error('LIFF Error:', err);
+                const urlParams = new URLSearchParams(window.location.search);
+                userId = urlParams.get('userId') || localStorage.getItem('chicku_userId') || 'test_user_123';
+            }
+
+            if (userId) {
+                localStorage.setItem('chicku_userId', userId);
+                updateNavLinks();
+                fetchSchedule();
+            }
+        }
+
+        function updateNavLinks() {
+            document.getElementById('nav-dashboard').href = `index.html?userId=${userId}`;
+            document.getElementById('nav-add').href = `add-task.html?userId=${userId}`;
+            document.getElementById('nav-schedule').href = `schedule.html?userId=${userId}`;
+        }
 
         const daysMap = {
             1: "วันจันทร์", 2: "วันอังคาร", 3: "วันพุธ",
             4: "วันพฤหัสบดี", 5: "วันศุกร์", 6: "วันเสาร์", 7: "วันอาทิตย์"
         };
-
-        let schedules = [];
 
         function openModal() {
             document.getElementById('addModal').style.display = 'flex';
@@ -209,7 +231,6 @@
             const now = new Date();
             let currentDay = now.getDay() === 0 ? 7 : now.getDay();
 
-            // Group by day
             const grouped = {};
             for(let i=1; i<=7; i++) grouped[i] = [];
             
@@ -219,11 +240,9 @@
 
             let html = '';
             for(let i=1; i<=7; i++) {
-                if (grouped[i].length === 0) continue; // Skip days with no classes
+                if (grouped[i].length === 0) continue;
                 
                 const isToday = currentDay === i;
-                
-                // Sort by start time
                 grouped[i].sort((a,b) => a.startTime.localeCompare(b.startTime));
 
                 html += `
@@ -268,7 +287,6 @@
             const now = new Date();
             let currentDay = now.getDay() === 0 ? 7 : now.getDay();
             
-            // Find next class today
             const todayClasses = schedules.filter(s => s.day === currentDay);
             if(todayClasses.length === 0) return;
 
@@ -344,8 +362,8 @@
             }
         }
 
-        fetchSchedule();
-        setInterval(updateCountdown, 60000); // Update every minute
+        initLiff();
+        setInterval(updateCountdown, 60000);
     </script>
 </body>
 </html>

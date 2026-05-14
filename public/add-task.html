@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>เพิ่มงานใหม่ - Chicku Dashboard</title>
     <link rel="stylesheet" href="styles.css">
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <style>
         .radio-group {
             display: flex;
@@ -118,22 +119,44 @@
     </div>
 
     <script>
-        const userId = localStorage.getItem('chicku_userId') || 'test_user_123';
-        
-        document.getElementById('nav-dashboard').href = `index.html?userId=${userId}`;
-        document.getElementById('nav-add').href = `add-task.html?userId=${userId}`;
-        document.getElementById('nav-schedule').href = `schedule.html?userId=${userId}`;
+        let userId = '';
+
+        async function initLiff() {
+            try {
+                await liff.init({ liffId: "YOUR_LIFF_ID" }); 
+                if (liff.isLoggedIn()) {
+                    const profile = await liff.getProfile();
+                    userId = profile.userId;
+                } else {
+                    liff.login();
+                }
+            } catch (err) {
+                console.error('LIFF Error:', err);
+                const urlParams = new URLSearchParams(window.location.search);
+                userId = urlParams.get('userId') || localStorage.getItem('chicku_userId') || 'test_user_123';
+            }
+
+            if (userId) {
+                localStorage.setItem('chicku_userId', userId);
+                updateNavLinks();
+            }
+        }
+
+        function updateNavLinks() {
+            document.getElementById('nav-dashboard').href = `index.html?userId=${userId}`;
+            document.getElementById('nav-add').href = `add-task.html?userId=${userId}`;
+            document.getElementById('nav-schedule').href = `schedule.html?userId=${userId}`;
+        }
 
         document.getElementById('add-task-form').addEventListener('submit', async (e) => {
             e.preventDefault();
+            if (!userId) return alert('ไม่พบข้อมูลผู้ใช้');
             
             const title = document.getElementById('title').value;
             const deadlineRaw = document.getElementById('deadline').value;
             const priority = document.querySelector('input[name="priority"]:checked').value;
             const note = document.getElementById('note').value;
             
-            // Format datetime a bit nicer or just send raw to backend
-            // raw: "2023-10-25T14:30" -> replace T with space
             const deadline = deadlineRaw.replace('T', ' ');
             const fullTitle = note ? `${title} (${note})` : title;
 
@@ -159,6 +182,8 @@
                 alert('เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์');
             }
         });
+
+        initLiff();
     </script>
 </body>
 </html>

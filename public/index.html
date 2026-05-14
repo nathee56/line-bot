@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chicku Dashboard</title>
     <link rel="stylesheet" href="styles.css">
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <style>
         .stats-container {
             display: grid;
@@ -108,24 +109,37 @@
     </div>
 
     <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        let userId = urlParams.get('userId');
+        let userId = '';
         
-        // Mock userId for testing if none provided
-        if (!userId) {
-            userId = localStorage.getItem('chicku_userId');
-            if (!userId) {
-                userId = 'test_user_123'; 
-                localStorage.setItem('chicku_userId', userId);
+        async function initLiff() {
+            try {
+                // เปลี่ยน YOUR_LIFF_ID เป็น LIFF ID จริงจาก LINE Developers
+                await liff.init({ liffId: "YOUR_LIFF_ID" }); 
+                if (liff.isLoggedIn()) {
+                    const profile = await liff.getProfile();
+                    userId = profile.userId;
+                } else {
+                    liff.login();
+                }
+            } catch (err) {
+                console.error('LIFF Error:', err);
+                // Fallback for testing
+                const urlParams = new URLSearchParams(window.location.search);
+                userId = urlParams.get('userId') || localStorage.getItem('chicku_userId') || 'test_user_123';
             }
-        } else {
-            localStorage.setItem('chicku_userId', userId);
+
+            if (userId) {
+                localStorage.setItem('chicku_userId', userId);
+                updateNavLinks();
+                fetchTasks();
+            }
         }
 
-        // Update nav links to preserve userId
-        document.getElementById('nav-dashboard').href = `index.html?userId=${userId}`;
-        document.getElementById('nav-add').href = `add-task.html?userId=${userId}`;
-        document.getElementById('nav-schedule').href = `schedule.html?userId=${userId}`;
+        function updateNavLinks() {
+            document.getElementById('nav-dashboard').href = `index.html?userId=${userId}`;
+            document.getElementById('nav-add').href = `add-task.html?userId=${userId}`;
+            document.getElementById('nav-schedule').href = `schedule.html?userId=${userId}`;
+        }
 
         async function fetchTasks() {
             try {
@@ -150,10 +164,8 @@
         function renderTasks(tasks) {
             const taskList = document.getElementById('task-list');
             
-            // Update stats
             document.getElementById('stat-total').textContent = tasks.length;
             document.getElementById('stat-urgent').textContent = tasks.filter(t => t.priority === 'high' || t.priority === '🔴 ด่วนมาก').length;
-            // stat-done needs a different query or just show 0 for now as we only fetch pending tasks
             document.getElementById('stat-done').textContent = '0';
 
             if (tasks.length === 0) {
@@ -202,14 +214,13 @@
             try {
                 await fetch(`/api/tasks/${id}`, { method: 'DELETE' });
                 document.getElementById(`task-${id}`).remove();
-                fetchTasks(); // refresh stats
+                fetchTasks();
             } catch (e) {
                 alert('เกิดข้อผิดพลาด');
             }
         }
 
-        // Initialize
-        fetchTasks();
+        initLiff();
     </script>
 </body>
 </html>
