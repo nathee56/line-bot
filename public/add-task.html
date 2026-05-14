@@ -178,7 +178,11 @@
                     document.getElementById('success-message').style.display = 'block';
                     
                     setTimeout(() => {
-                        window.location.href = `index.html?userId=${userId}`;
+                        if (liff.isInClient()) {
+                            liff.closeWindow(); // ปิดหน้าต่างกลับไปหน้าแชท LINE
+                        } else {
+                            window.location.href = `index.html?userId=${userId}`; // ถ้าเปิดในเบราว์เซอร์ปกติให้กลับหน้าแรก
+                        }
                     }, 2000);
                 } else {
                     alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
