@@ -1,6 +1,7 @@
 const cron = require('node-cron');
 const { getUpcomingTasks, updateTask } = require('./firebase');
-const { pushMessage } = require('./lineClient');
+const { pushFlexMessage } = require('./lineClient');
+const { createNotificationFlex } = require('./flexTemplates');
 
 function startScheduler() {
     // Run every 30 minutes
@@ -17,13 +18,13 @@ function startScheduler() {
 
                 // Check 24 hours notification
                 if (diffHrs <= 24 && diffHrs > 1 && !task.notified1day) {
-                    await pushMessage(task.userId, `🔔 แจ้งเตือน: งาน "${task.title}" กำลังจะครบกำหนดในอีก 24 ชั่วโมง (Deadline: ${task.deadline})`);
+                    await pushFlexMessage(task.userId, `แจ้งเตือน: ${task.title}`, createNotificationFlex(task.title, task.deadline, "24 ชั่วโมง"));
                     await updateTask(task.id, { notified1day: true });
                 }
 
                 // Check 1 hour notification
                 if (diffHrs <= 1 && diffHrs > 0 && !task.notified1hr) {
-                    await pushMessage(task.userId, `⚠️ ด่วน! แจ้งเตือน: งาน "${task.title}" กำลังจะครบกำหนดในอีก 1 ชั่วโมง (Deadline: ${task.deadline})`);
+                    await pushFlexMessage(task.userId, `ด่วน! แจ้งเตือน: ${task.title}`, createNotificationFlex(task.title, task.deadline, "1 ชั่วโมง"));
                     await updateTask(task.id, { notified1hr: true });
                 }
             }

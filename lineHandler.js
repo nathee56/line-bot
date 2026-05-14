@@ -1,6 +1,7 @@
 const { askAI } = require('./thaillm');
 const { saveTask, markDone, getTasks } = require('./firebase');
-const { replyMessage } = require('./lineClient');
+const { replyMessage, sendFlexMessage } = require('./lineClient');
+const { createTaskFlex, createTaskListFlex } = require('./flexTemplates');
 
 async function handleMessage(event) {
     if (event.type !== 'message' || event.message.type !== 'text') {
@@ -37,8 +38,13 @@ async function handleMessage(event) {
 
         if (intent === 'add_task' && task) {
             await saveTask(userId, task);
+            return await sendFlexMessage(replyToken, "บันทึกงานใหม่สำเร็จ", createTaskFlex(task.title, task.deadline));
         } else if (intent === 'mark_done' && doneId) {
             await markDone(doneId);
+            return await replyMessage(replyToken, reply || "ทำเครื่องหมายว่าเสร็จสิ้นแล้วค่ะ ✅");
+        } else if (intent === 'list_tasks' || userText.includes('รายการ') || userText.includes('งานทั้งหมด')) {
+            const currentTasks = await getTasks(userId);
+            return await sendFlexMessage(replyToken, "รายการงานของคุณ", createTaskListFlex(currentTasks));
         }
 
         await replyMessage(replyToken, reply || "ดำเนินการเรียบร้อยแล้วค่ะ");
