@@ -64,9 +64,11 @@ async function handleMessage(event) {
             return await sendFlexMessage(replyToken, "รายการงานของคุณ", createTaskListFlex(currentTasks));
         }
         
-        if (intent === 'add_task' && task) {
-            await saveTask(userId, task, deadline);
-            return await sendFlexMessage(replyToken, "บันทึกงานใหม่สำเร็จ", createTaskFlex(task, deadline));
+        if (intent === 'add_task' && (task || result.title)) {
+            const taskTitle = task || result.title || "(ไม่มีหัวข้อ)";
+            const taskDeadline = deadline || result.deadline || "ไม่ระบุ";
+            await saveTask(userId, taskTitle, taskDeadline);
+            return await sendFlexMessage(replyToken, "บันทึกงานใหม่สำเร็จ", createTaskFlex(taskTitle, taskDeadline));
         } else if (intent === 'mark_done' && doneId) {
             await markDone(doneId);
             return await replyMessage(replyToken, reply || "ทำเครื่องหมายว่าเสร็จสิ้นแล้วค่ะ ✅");
