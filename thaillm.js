@@ -1,4 +1,4 @@
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+const { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } = require("@google/generative-ai");
 require('dotenv').config();
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -6,7 +6,13 @@ const model = genAI.getGenerativeModel({
     model: "gemini-1.5-flash",
     generationConfig: {
         responseMimeType: "application/json",
-    }
+    },
+    safetySettings: [
+        { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE },
+        { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_NONE },
+        { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_NONE },
+        { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_NONE },
+    ]
 });
 
 const systemPrompt = `
@@ -41,10 +47,16 @@ async function askAI(userPrompt) {
     try {
         const result = await model.generateContent([systemPrompt, userPrompt]);
         const response = await result.response;
-        return response.text();
+        const text = response.text();
+        if (!text) throw new Error('Empty response from Gemini');
+        return text;
     } catch (error) {
         console.error('Gemini API Error:', error);
-        return JSON.stringify({ intent: 'general', reply: 'ขออภัยค่ะ Chicku เกิดข้อผิดพลาดในการเชื่อมต่อกับสมองกล ลองใหม่อีกครั้งนะคะ' });
+        // Fallback for UI if AI fails
+        return JSON.stringify({ 
+            intent: 'general', 
+            reply: 'ขออภัยค่ะ ระบบประมวลผลขัดข้องชั่วคราว ลองพิมพ์ใหม่อีกครั้งนะคะ (Error: ' + (error.message || 'Unknown') + ')' 
+        });
     }
 }
 
