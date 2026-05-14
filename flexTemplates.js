@@ -509,11 +509,205 @@ function errorCard(message) {
     };
 }
 
+function notificationSettingsCard() {
+    return {
+        type: "bubble",
+        size: "mega",
+        header: {
+            type: "box",
+            layout: "vertical",
+            contents: [
+                {
+                    type: "text",
+                    text: "⚙️ ตั้งค่าการแจ้งเตือน",
+                    weight: "bold",
+                    color: "#FFFFFF",
+                    size: "lg"
+                }
+            ],
+            backgroundColor: "#4B5563",
+            paddingAll: "xl"
+        },
+        body: {
+            type: "box",
+            layout: "vertical",
+            spacing: "md",
+            contents: [
+                {
+                    type: "text",
+                    text: "ต้องการให้ Chicku เตือนบ่อยแค่ไหนคะ? เลือกรูปแบบที่ต้องการได้เลยจ้า 🐥",
+                    wrap: true,
+                    color: "#333333",
+                    size: "sm"
+                },
+                {
+                    type: "button",
+                    action: {
+                        type: "message",
+                        label: "🔔 เตือนทุกระยะ (ดีที่สุด)",
+                        text: "เซ็ตแจ้งเตือน: all"
+                    },
+                    style: "primary",
+                    color: "#FF8C00",
+                    margin: "md"
+                },
+                {
+                    type: "button",
+                    action: {
+                        type: "message",
+                        label: "📅 เตือนล่วงหน้า 1 วัน",
+                        text: "เซ็ตแจ้งเตือน: 1day"
+                    },
+                    style: "secondary",
+                    margin: "sm"
+                },
+                {
+                    type: "button",
+                    action: {
+                        type: "message",
+                        label: "🚨 เตือนเฉพาะงานด่วน",
+                        text: "เซ็ตแจ้งเตือน: urgent"
+                    },
+                    style: "secondary",
+                    margin: "sm"
+                },
+                {
+                    type: "button",
+                    action: {
+                        type: "message",
+                        label: "📴 ปิดการแจ้งเตือน",
+                        text: "เซ็ตแจ้งเตือน: off"
+                    },
+                    style: "link",
+                    color: "#EF4444",
+                    margin: "sm"
+                }
+            ],
+            backgroundColor: "#FFF5E6",
+            paddingAll: "xl"
+        }
+    };
+}
+
+function howToUseCard() {
+    return {
+        type: "bubble",
+        size: "mega",
+        header: {
+            type: "box",
+            layout: "vertical",
+            contents: [
+                {
+                    type: "text",
+                    text: "📖 วิธีใช้งาน Chicku",
+                    weight: "bold",
+                    color: "#FFFFFF",
+                    size: "lg"
+                }
+            ],
+            backgroundColor: "#FF8C00",
+            paddingAll: "xl"
+        },
+        body: {
+            type: "box",
+            layout: "vertical",
+            spacing: "lg",
+            contents: [
+                {
+                    type: "box",
+                    layout: "vertical",
+                    spacing: "sm",
+                    contents: [
+                        {
+                            type: "text",
+                            text: "1. การเพิ่มงานใหม่ 📝",
+                            weight: "bold",
+                            size: "md",
+                            color: "#FF8C00"
+                        },
+                        {
+                            type: "text",
+                            text: "พิมพ์หาบอทได้เลย เช่น 'ซักผ้า พรุ่งนี้ 8 โมง' หรือกดปุ่ม 'เพิ่มงาน' บน Rich Menu เพื่อเปิดหน้าเว็บจ้า",
+                            wrap: true,
+                            size: "xs",
+                            color: "#666666"
+                        }
+                    ]
+                },
+                {
+                    type: "box",
+                    layout: "vertical",
+                    spacing: "sm",
+                    contents: [
+                        {
+                            type: "text",
+                            text: "2. การดูรายการงาน 📊",
+                            weight: "bold",
+                            size: "md",
+                            color: "#FF8C00"
+                        },
+                        {
+                            type: "text",
+                            text: "กดปุ่ม 'รายการงาน' หรือเข้า Dashboard ผ่านหน้าเว็บเพื่อดูสรุปงานทั้งหมดและกดเสร็จงานได้จ้า",
+                            wrap: true,
+                            size: "xs",
+                            color: "#666666"
+                        }
+                    ]
+                },
+                {
+                    type: "box",
+                    layout: "vertical",
+                    spacing: "sm",
+                    contents: [
+                        {
+                            type: "text",
+                            text: "3. ระบบแจ้งเตือน ⏰",
+                            weight: "bold",
+                            size: "md",
+                            color: "#FF8C00"
+                        },
+                        {
+                            type: "text",
+                            text: "Chicku จะคอยสะกิดเตือนเมื่อใกล้ถึงกำหนดส่ง เพื่อให้คุณไม่พลาดทุกนัดหมายสำคัญ!",
+                            wrap: true,
+                            size: "xs",
+                            color: "#666666"
+                        }
+                    ]
+                }
+            ],
+            backgroundColor: "#FFF5E6",
+            paddingAll: "xl"
+        },
+        footer: {
+            type: "box",
+            layout: "vertical",
+            contents: [
+                {
+                    type: "button",
+                    action: {
+                        type: "message",
+                        label: "เข้าใจแล้วจ้า! 🐥",
+                        text: "เมนูหลัก"
+                    },
+                    style: "primary",
+                    color: "#FF8C00"
+                }
+            ],
+            backgroundColor: "#FFF5E6",
+            paddingAll: "md"
+        }
+    };
+}
+
 module.exports = {
     taskAddedCard,
     taskListCard,
     reminderCard,
     completedCard,
     scheduleCard,
-    errorCard
+    errorCard,
+    notificationSettingsCard,
+    howToUseCard
 };

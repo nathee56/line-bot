@@ -1,5 +1,5 @@
 const cron = require('node-cron');
-const { getUpcomingTasks, updateTask } = require('./firebase');
+const { getUpcomingTasks, updateTask, getUserSettings } = require('./firebase');
 const { pushFlexMessage } = require('./lineClient');
 const { reminderCard, scheduleCard } = require('./flexTemplates');
 const admin = require('firebase-admin');
@@ -22,6 +22,9 @@ function startScheduler() {
             let currentDay = now.getDay(); // 0=Sun, 1=Mon... 6=Sat
             if (currentDay === 0) currentDay = 7; // Convert Sun to 7
 
+            // Cache user settings to avoid redundant DB calls
+            const userSettingsCache = {};
+
             // 1. Task Reminders
             const tasks = await getUpcomingTasks();
 
@@ -31,20 +34,36 @@ function startScheduler() {
                 const deadlineDate = new Date(task.deadline);
                 if (isNaN(deadlineDate.getTime())) continue;
 
+                // Get user settings
+                if (!userSettingsCache[task.userId]) {
+                    userSettingsCache[task.userId] = await getUserSettings(task.userId);
+                }
+                const settings = userSettingsCache[task.userId];
+                const pref = settings.reminderPref || 'all';
+
+                if (pref === 'off') continue;
+
                 const diffMs = deadlineDate - now;
                 const diffHrs = diffMs / (1000 * 60 * 60);
 
                 if (diffHrs > 0) {
-                    if (diffHrs <= 24 && diffHrs > 3 && !task.notified1day) {
+                    // Check logic based on preference
+                    const canNotify1day = (pref === 'all' || pref === '1day');
+                    const canNotifyUrgent = (pref === 'all' || pref === 'urgent');
+
+                    if (diffHrs <= 24 && diffHrs > 3 && !task.notified1day && canNotify1day) {
                         await pushFlexMessage(task.userId, `⏰ อย่าลืมนะ! งาน: ${task.title}`, reminderCard(task, "24 ชั่วโมง", "warning"));
                         await updateTask(task.id, { notified1day: true });
-                    } else if (diffHrs <= 3 && diffHrs > 1 && !task.notified3hr) {
+                    } 
+                    else if (diffHrs <= 3 && diffHrs > 1 && !task.notified3hr && pref === 'all') {
                         await pushFlexMessage(task.userId, `⏰ ใกล้ถึงกำหนดแล้ว! งาน: ${task.title}`, reminderCard(task, "3 ชั่วโมง", "warning"));
                         await updateTask(task.id, { notified3hr: true });
-                    } else if (diffHrs <= 1 && diffHrs > 0.5 && !task.notified1hr) {
+                    } 
+                    else if (diffHrs <= 1 && diffHrs > 0.5 && !task.notified1hr && canNotifyUrgent) {
                         await pushFlexMessage(task.userId, `🚨 ด่วน! งาน: ${task.title}`, reminderCard(task, "1 ชั่วโมง", "urgent"));
                         await updateTask(task.id, { notified1hr: true });
-                    } else if (diffHrs <= 0.5 && !task.notified30min) {
+                    } 
+                    else if (diffHrs <= 0.5 && !task.notified30min && canNotifyUrgent) {
                         await pushFlexMessage(task.userId, `🚨 ด่วนมาก! งาน: ${task.title}`, reminderCard(task, "30 นาที", "urgent"));
                         await updateTask(task.id, { notified30min: true });
                     }
@@ -60,6 +79,12 @@ function startScheduler() {
                 const todayStr = now.toDateString();
 
                 for (const sch of todaySchedules) {
+                    // Check settings for schedule (uses same preference or simple on/off)
+                    if (!userSettingsCache[sch.userId]) {
+                        userSettingsCache[sch.userId] = await getUserSettings(sch.userId);
+                    }
+                    if (userSettingsCache[sch.userId].reminderPref === 'off') continue;
+
                     const classTime = parseTime(sch.startTime);
                     if (classTime) {
                         const diffMs = classTime - now;

@@ -138,7 +138,23 @@ async function deleteSchedule(scheduleId) {
     return await db.collection('schedules').doc(scheduleId).delete();
 }
 
+// User Settings Functions
+async function getUserSettings(userId) {
+    if (!db) return { reminderPref: 'all' }; // Default is all
+    const doc = await db.collection('users').doc(userId).get();
+    if (doc.exists) {
+        return doc.data();
+    }
+    return { reminderPref: 'all' };
+}
+
+async function saveUserSettings(userId, settings) {
+    if (!db) return;
+    return await db.collection('users').doc(userId).set(settings, { merge: true });
+}
+
 module.exports = { 
     saveTask, getTasks, getUpcomingTasks, updateTask, markDone, deleteTask,
-    getSchedule, saveSchedule, deleteSchedule
+    getSchedule, saveSchedule, deleteSchedule,
+    getUserSettings, saveUserSettings
 };

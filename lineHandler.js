@@ -1,12 +1,14 @@
 const { askAI } = require('./thaillm');
-const { saveTask, markDone, getTasks, getSchedule } = require('./firebase');
+const { saveTask, markDone, getTasks, getSchedule, saveUserSettings } = require('./firebase');
 const { replyMessage, sendFlexMessage } = require('./lineClient');
 const { 
     taskAddedCard, 
     taskListCard, 
     completedCard, 
     scheduleCard, 
-    errorCard 
+    errorCard,
+    notificationSettingsCard,
+    howToUseCard
 } = require('./flexTemplates');
 
 async function handleMessage(event) {
@@ -26,13 +28,29 @@ async function handleMessage(event) {
             return await replyMessage(replyToken, "🐥 ต้องการให้ Chicku ช่วยจำเรื่องอะไรคะ? พิมพ์รายละเอียดงานและวันเวลามาได้เลย! \n\nตัวอย่าง: 'ซักผ้า พรุ่งนี้ 8 โมงเช้า'");
         }
 
-        if (userText === 'รายการ') {
+        if (userText === 'ตั้งค่าการแจ้งเตือน') {
+            return await sendFlexMessage(replyToken, "ตั้งค่าการแจ้งเตือน", notificationSettingsCard());
+        }
+
+        if (userText.startsWith('เซ็ตแจ้งเตือน: ')) {
+            const pref = userText.replace('เซ็ตแจ้งเตือน: ', '');
+            await saveUserSettings(userId, { reminderPref: pref });
+            const labels = { 'all': 'เตือนทุกระยะ', '1day': 'เตือนล่วงหน้า 1 วัน', 'urgent': 'เตือนเฉพาะงานด่วน', 'off': 'ปิดการแจ้งเตือน' };
+            return await replyMessage(replyToken, `🐥 ตั้งค่าเป็น "${labels[pref] || pref}" เรียบร้อยแล้วจ้า!`);
+        }
+
+        if (userText === 'ดูตารางงานทั้งหมด' || userText === 'รายการ') {
             const currentTasks = await getTasks(userId);
             return await sendFlexMessage(replyToken, "รายการงานของคุณ", taskListCard(currentTasks));
         }
 
+        if (userText === 'วิธีใช้เว็บไซต์') {
+            return await sendFlexMessage(replyToken, "วิธีใช้งาน Chicku", howToUseCard());
+        }
+
         if (userText === 'ตารางเรียน') {
             const schedules = await getSchedule(userId);
+            const now = new Date();
             const currentDay = now.getDay() === 0 ? 7 : now.getDay();
             const todaySchedules = schedules.filter(s => s.day === currentDay);
             return await sendFlexMessage(replyToken, "ตารางเรียนวันนี้", scheduleCard(todaySchedules));
@@ -40,7 +58,6 @@ async function handleMessage(event) {
 
         if (userText.startsWith('เสร็จงาน ')) {
             const taskTitle = userText.replace('เสร็จงาน ', '');
-            // We need to find the task id. This is a bit hacky but works for simple bot
             const tasks = await getTasks(userId);
             const task = tasks.find(t => t.title === taskTitle);
             if (task) {
