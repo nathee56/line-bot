@@ -15,11 +15,14 @@ if (serviceAccount && !admin.apps.length) {
     admin.initializeApp({
         credential: admin.credential.cert(serviceAccount)
     });
+} else if (!serviceAccount) {
+    console.error('ERROR: FIREBASE_SERVICE_ACCOUNT is missing or invalid!');
 }
 
-const db = admin.firestore();
+const db = admin.apps.length ? admin.firestore() : null;
 
 async function saveTask(userId, task) {
+    if (!db) throw new Error('Firestore not initialized');
     const newTask = {
         userId,
         title: task.title,
@@ -33,6 +36,7 @@ async function saveTask(userId, task) {
 }
 
 async function getTasks(userId) {
+    if (!db) return [];
     const snapshot = await db.collection('tasks')
         .where('userId', '==', userId)
         .where('isDone', '==', false)
@@ -43,6 +47,7 @@ async function getTasks(userId) {
 }
 
 async function getUpcomingTasks() {
+    if (!db) return [];
     const now = new Date();
     const future25h = new Date(now.getTime() + 25 * 60 * 60 * 1000);
     
@@ -56,10 +61,12 @@ async function getUpcomingTasks() {
 }
 
 async function updateTask(taskId, fields) {
+    if (!db) return;
     return await db.collection('tasks').doc(taskId).update(fields);
 }
 
 async function markDone(taskId) {
+    if (!db) return;
     return await db.collection('tasks').doc(taskId).update({ isDone: true });
 }
 
