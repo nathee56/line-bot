@@ -18,7 +18,10 @@ async function handleMessage(event) {
         const tasks = await getTasks(userId);
         const taskContext = tasks.map((t, i) => `${i + 1}. [${t.id}] ${t.title} (Deadline: ${t.deadline})`).join('\n');
         
-        const prompt = `User ID: ${userId}\nMessage: ${userText}\n\nCurrent Tasks:\n${taskContext || 'No active tasks.'}\n\nPlease parse this message.`;
+        const now = new Date();
+        const currentDateTimeStr = now.toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' });
+        
+        const prompt = `Today is: ${currentDateTimeStr}\nUser ID: ${userId}\nMessage: ${userText}\n\nCurrent Tasks:\n${taskContext || 'No active tasks.'}\n\nPlease parse this message.`;
         
         const aiResponse = await askAI(prompt);
         let result;

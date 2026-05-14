@@ -155,7 +155,7 @@ function createTaskListFlex(tasks) {
                     align: "center"
                 }
             ],
-            backgroundColor: "#2C3E50"
+            backgroundColor: "#FF8C2A"
         },
         body: {
             type: "box",
