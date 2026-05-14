@@ -16,46 +16,46 @@
     <!-- Minimal Success Overlay -->
     <div class="overlay" id="success-overlay">
         <div class="popup-card">
-            <h2 class="title-xl">Task Saved</h2>
-            <p class="subtitle">Chicku will remind you soon 🐥</p>
+            <h2 class="title-xl">บันทึกเรียบร้อย!</h2>
+            <p class="subtitle">เดี๋ยว Chicku ช่วยสะกิดเตือนนะคะ 🐥</p>
         </div>
     </div>
 
     <div class="container">
         <div class="mascot-container">
             <img src="chicku-mascot.png" alt="Chicku" class="mascot-img">
-            <h1 class="title-xl">New Task</h1>
-            <p class="subtitle">Tell Chicku what to remember</p>
+            <h1 class="title-xl">จดงานใหม่</h1>
+            <p class="subtitle">บอกให้ Chicku ช่วยจำเรื่องอะไรดี? 🐥</p>
         </div>
 
         <form id="add-task-form">
             <div class="form-group">
-                <label class="form-label">Task Name</label>
-                <input type="text" id="title" class="form-control" placeholder="e.g., Design Review" required>
+                <label class="form-label">ชื่อของงาน</label>
+                <input type="text" id="title" class="form-control" placeholder="เช่น ส่งรายงาน, ทำการบ้าน..." required>
             </div>
 
             <div class="form-group">
-                <label class="form-label">Deadline</label>
+                <label class="form-label">กำหนดส่ง</label>
                 <input type="datetime-local" id="deadline" class="form-control">
             </div>
 
             <div class="form-group">
-                <label class="form-label">Priority</label>
+                <label class="form-label">ความสำคัญ</label>
                 <div class="priority-selector">
-                    <div class="priority-option" data-priority="urgent">Urgent</div>
-                    <div class="priority-option active" data-priority="normal">Normal</div>
-                    <div class="priority-option" data-priority="low">Low</div>
+                    <div class="priority-option" data-priority="urgent">ด่วนมาก</div>
+                    <div class="priority-option active" data-priority="normal">ปกติ</div>
+                    <div class="priority-option" data-priority="low">ต่ำ</div>
                 </div>
                 <input type="hidden" id="priority" value="ปกติ">
             </div>
 
             <div class="form-group">
-                <label class="form-label">Notes (Optional)</label>
-                <textarea id="note" class="form-control" rows="2" style="resize: none;" placeholder="Details..."></textarea>
+                <label class="form-label">หมายเหตุเพิ่มเติม</label>
+                <textarea id="note" class="form-control" rows="2" style="resize: none;" placeholder="รายละเอียดเพิ่มเติม (ถ้ามี)..."></textarea>
             </div>
 
             <button type="submit" class="btn btn-primary" style="margin-top: 40px;">
-                Save Task
+                บันทึกงานเลย 🐥
             </button>
         </form>
     </div>
@@ -67,11 +67,11 @@
         </a>
         <a href="add-task.html" class="nav-item active" id="nav-add">
             <span class="nav-icon">➕</span>
-            Add
+            เพิ่มงาน
         </a>
         <a href="schedule.html" class="nav-item" id="nav-schedule">
             <span class="nav-icon">📅</span>
-            Schedule
+            ตารางเรียน
         </a>
     </div>
 

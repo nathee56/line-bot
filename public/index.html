@@ -11,7 +11,7 @@
 
     <div class="loader-overlay" id="global-loader">
         <img src="chicku-mascot.png" alt="Chicku" class="mascot-img">
-        <div class="loader-text">Loading Dashboard</div>
+        <div class="loader-text">กำลังเปิดหน้ากระดานงาน...</div>
     </div>
 
     <div class="container">
@@ -22,33 +22,32 @@
             <p id="today-date" class="subtitle"></p>
         </div>
 
-        <!-- Text-based Summary -->
+        <!-- Summary with Thai labels & Color -->
         <div class="summary-container">
             <div class="summary-item">
                 <span class="value" id="count-total">0</span>
-                <span class="label">Total</span>
+                <span class="label">งานทั้งหมด</span>
             </div>
             <div class="summary-item">
                 <span class="value" id="count-urgent" style="color: var(--danger);">0</span>
-                <span class="label">Urgent</span>
+                <span class="label">งานด่วน</span>
             </div>
             <div class="summary-item">
                 <span class="value" id="count-done" style="color: var(--success);">0</span>
-                <span class="label">Done</span>
+                <span class="label">เสร็จแล้ว</span>
             </div>
         </div>
 
-        <!-- Minimalist List -->
+        <!-- Minimalist Thai List -->
         <div style="margin-top: 40px;">
-            <h2 style="font-size: 20px; margin-bottom: 10px;">Pending Tasks</h2>
+            <h2 style="font-size: 18px; margin-bottom: 10px; font-weight: 600;">รายการงานที่ค้างอยู่</h2>
             <div id="task-list">
-                <!-- Tasks rendered as clean rows -->
-                <p class="text-muted" style="text-align: center; padding: 40px;">Fetching your tasks...</p>
+                <p class="text-muted" style="text-align: center; padding: 40px;">กำลังรวบรวมงานให้คุณ...</p>
             </div>
         </div>
     </div>
 
-    <!-- Minimal Bottom Nav -->
+    <!-- Ultra Minimal Nav -->
     <div class="nav-bar">
         <a href="index.html" class="nav-item active" id="nav-dashboard">
             <span class="nav-icon">📊</span>
@@ -56,11 +55,11 @@
         </a>
         <a href="add-task.html" class="nav-item" id="nav-add">
             <span class="nav-icon">➕</span>
-            Add
+            เพิ่มงาน
         </a>
         <a href="schedule.html" class="nav-item" id="nav-schedule">
             <span class="nav-icon">📅</span>
-            Schedule
+            ตารางเรียน
         </a>
     </div>
 
@@ -92,7 +91,7 @@
 
         function displayDate() {
             const options = { day: 'numeric', month: 'long', year: 'numeric' };
-            const today = new Date().toLocaleDateString('en-US', options);
+            const today = new Date().toLocaleDateString('th-TH', options);
             document.getElementById('today-date').innerText = today;
         }
 
@@ -125,15 +124,15 @@
         function renderTasks(tasks) {
             const container = document.getElementById('task-list');
             if (tasks.length === 0) {
-                container.innerHTML = `<p class="text-muted" style="text-align: center; padding: 60px;">🐥 No pending tasks. Enjoy your day.</p>`;
+                container.innerHTML = `<p class="text-muted" style="text-align: center; padding: 60px;">🐥 ไม่มีงานค้างเลย พักผ่อนได้เต็มที่นะ!</p>`;
                 return;
             }
 
             container.innerHTML = tasks.map((task) => {
-                const title = task.title || "Untitled Task";
+                const title = task.title || "ไม่ได้ระบุชื่องาน";
                 const deadlineStr = task.deadline && task.deadline !== "ไม่ระบุ" 
-                    ? new Date(task.deadline).toLocaleDateString('en-US', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
-                    : "No deadline";
+                    ? new Date(task.deadline).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+                    : "ไม่ได้กำหนดเวลา";
                 
                 const dotClass = task.priority === 'ด่วนมาก' || task.priority === 'urgent' ? 'dot-urgent' : 
                                 (task.priority === 'ปกติ' || task.priority === 'normal' ? 'dot-normal' : 'dot-low');
@@ -146,8 +145,8 @@
                             <span>${deadlineStr}</span>
                         </div>
                         <div style="display: flex; gap: 20px; margin-top: 5px;">
-                            <button class="btn-ghost-success" onclick="completeTask('${task.id}')">Done</button>
-                            <button class="btn-ghost-danger" onclick="deleteTask('${task.id}')">Remove</button>
+                            <button class="btn-ghost-success" onclick="completeTask('${task.id}')">เสร็จงาน</button>
+                            <button class="btn-ghost-danger" onclick="deleteTask('${task.id}')">ลบทิ้ง</button>
                         </div>
                     </div>
                 `;
@@ -163,7 +162,6 @@
                     el.style.transform = 'translateY(-10px)';
                     setTimeout(() => {
                         el.remove();
-                        // Update summary locally
                         let doneCount = parseInt(localStorage.getItem(`done_count_${userId}`) || 0);
                         localStorage.setItem(`done_count_${userId}`, doneCount + 1);
                         document.getElementById('count-done').innerText = doneCount + 1;

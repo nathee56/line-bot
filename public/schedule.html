@@ -18,6 +18,7 @@
             font-size: 14px;
             font-weight: 700;
             width: 90px;
+            color: var(--primary);
         }
         .class-details { flex: 1; }
         .class-subject { font-size: 17px; font-weight: 600; }
@@ -38,28 +39,28 @@
     </div>
 
     <div class="container">
-        <!-- Minimal Header -->
+        <!-- Minimal Thai Header -->
         <div class="mascot-container">
-            <h1 class="title-xl">Schedule</h1>
-            <p class="subtitle">What's on today? 🐥</p>
+            <h1 class="title-xl">ตารางเรียน</h1>
+            <p class="subtitle">วันนี้มีเรียนอะไรบ้างคะ? 🐥</p>
         </div>
 
-        <!-- Minimal Countdown -->
+        <!-- Minimal Thai Countdown -->
         <div id="countdown-area" style="text-align: center; margin-bottom: 50px;">
-            <p class="subtitle" style="text-transform: uppercase; letter-spacing: 1px;">Next Class</p>
+            <p class="subtitle" style="text-transform: uppercase; letter-spacing: 1px;">วิชาถัดไป</p>
             <h2 id="next-subject" style="font-size: 24px; margin: 8px 0;">---</h2>
-            <p id="cd-timer" style="font-size: 16px; font-weight: 600; color: var(--primary);">--h --m left</p>
+            <p id="cd-timer" style="font-size: 16px; font-weight: 600; color: var(--primary);">อีก -- ชม. -- น.</p>
         </div>
 
-        <!-- Text-based Day Tabs -->
+        <!-- Text-based Day Tabs (Thai) -->
         <div class="tabs" id="day-tabs">
-            <div class="tab-item" onclick="changeDay(1)">Mon</div>
-            <div class="tab-item" onclick="changeDay(2)">Tue</div>
-            <div class="tab-item" onclick="changeDay(3)">Wed</div>
-            <div class="tab-item" onclick="changeDay(4)">Thu</div>
-            <div class="tab-item" onclick="changeDay(5)">Fri</div>
-            <div class="tab-item" onclick="changeDay(6)">Sat</div>
-            <div class="tab-item" onclick="changeDay(7)">Sun</div>
+            <div class="tab-item" onclick="changeDay(1)">จันทร์</div>
+            <div class="tab-item" onclick="changeDay(2)">อังคาร</div>
+            <div class="tab-item" onclick="changeDay(3)">พุธ</div>
+            <div class="tab-item" onclick="changeDay(4)">พฤหัสบดี</div>
+            <div class="tab-item" onclick="changeDay(5)">ศุกร์</div>
+            <div class="tab-item" onclick="changeDay(6)">เสาร์</div>
+            <div class="tab-item" onclick="changeDay(7)">อาทิตย์</div>
         </div>
 
         <div id="schedule-list">
@@ -67,48 +68,48 @@
         </div>
 
         <button class="btn btn-outline" style="margin-top: 40px;" onclick="openModal()">
-            Add Class
+            เพิ่มวิชาเรียน
         </button>
     </div>
 
     <!-- Modal Form - Full screen clean -->
     <div class="modal" id="addModal">
         <div style="width: 100%; max-width: 400px;">
-            <h2 class="title-xl mb-2" style="text-align: center;">New Class</h2>
+            <h2 class="title-xl mb-2" style="text-align: center;">เพิ่มวิชาเรียนใหม่</h2>
             <form id="add-schedule-form">
                 <div class="form-group">
-                    <label class="form-label">Day</label>
+                    <label class="form-label">วันเรียน</label>
                     <select id="day" class="form-control">
-                        <option value="1">Monday</option>
-                        <option value="2">Tuesday</option>
-                        <option value="3">Wednesday</option>
-                        <option value="4">Thursday</option>
-                        <option value="5">Friday</option>
-                        <option value="6">Saturday</option>
-                        <option value="7">Sunday</option>
+                        <option value="1">วันจันทร์</option>
+                        <option value="2">วันอังคาร</option>
+                        <option value="3">วันพุธ</option>
+                        <option value="4">วันพฤหัสบดี</option>
+                        <option value="5">วันศุกร์</option>
+                        <option value="6">วันเสาร์</option>
+                        <option value="7">วันอาทิตย์</option>
                     </select>
                 </div>
                 <div style="display: flex; gap: 20px;">
                     <div class="form-group" style="flex: 1;">
-                        <label class="form-label">Starts</label>
+                        <label class="form-label">เวลาเริ่ม</label>
                         <input type="time" id="startTime" class="form-control" required>
                     </div>
                     <div class="form-group" style="flex: 1;">
-                        <label class="form-label">Ends</label>
+                        <label class="form-label">เวลาจบ</label>
                         <input type="time" id="endTime" class="form-control" required>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Subject</label>
-                    <input type="text" id="subject" class="form-control" placeholder="e.g., Computer Science" required>
+                    <label class="form-label">ชื่อวิชา</label>
+                    <input type="text" id="subject" class="form-control" placeholder="เช่น English 101" required>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Room</label>
-                    <input type="text" id="room" class="form-control" placeholder="e.g., Hall 1">
+                    <label class="form-label">ห้องเรียน</label>
+                    <input type="text" id="room" class="form-control" placeholder="เช่น Lab 401">
                 </div>
                 <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 30px;">
-                    <button type="submit" class="btn btn-primary">Save Class</button>
-                    <button type="button" class="btn btn-ghost-danger" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">บันทึกวิชาเรียน</button>
+                    <button type="button" class="btn-ghost-danger" onclick="closeModal()">ยกเลิก</button>
                 </div>
             </form>
         </div>
@@ -121,11 +122,11 @@
         </a>
         <a href="add-task.html" class="nav-item" id="nav-add">
             <span class="nav-icon">➕</span>
-            Add
+            เพิ่มงาน
         </a>
         <a href="schedule.html" class="nav-item active" id="nav-schedule">
             <span class="nav-icon">📅</span>
-            Schedule
+            ตารางเรียน
         </a>
     </div>
 
@@ -191,7 +192,7 @@
             daySchedules.sort((a,b) => a.startTime.localeCompare(b.startTime));
 
             if (daySchedules.length === 0) {
-                container.innerHTML = `<p class="text-muted" style="text-align: center; padding: 60px;">🐥 No classes today. Time to rest.</p>`;
+                container.innerHTML = `<p class="text-muted" style="text-align: center; padding: 60px;">🐥 วันนี้ไม่มีเรียนเลย พักผ่อนได้เต็มที่นะ!</p>`;
                 return;
             }
 
@@ -201,7 +202,7 @@
                         <div class="class-time">${sch.startTime}</div>
                         <div class="class-details">
                             <div class="class-subject">${sch.subject}</div>
-                            <div class="class-room">${sch.room || "No room"}</div>
+                            <div class="class-room">📍 ${sch.room || "ไม่ได้ระบุห้อง"}</div>
                         </div>
                         <button onclick="deleteSchedule('${sch.id}')" style="border:none; background:none; font-size:14px; color:var(--danger);">✕</button>
                     </div>
@@ -220,7 +221,7 @@
                 .sort((a,b) => a.startTime.localeCompare(b.startTime))[0];
 
             if (!nextClass) {
-                document.getElementById('next-subject').innerText = "All done for today";
+                document.getElementById('next-subject').innerText = "หมดคาบเรียนวันนี้แล้วจ้า";
                 document.getElementById('cd-timer').innerText = "🐥";
                 return;
             }
@@ -235,13 +236,14 @@
             const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
             const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
 
-            document.getElementById('cd-timer').innerText = `${diffHrs}h ${diffMins}m left`;
+            document.getElementById('cd-timer').innerText = `อีก ${diffHrs} ชม. ${diffMins} น.`;
         }
 
         function openModal() { document.getElementById('addModal').style.display = 'flex'; }
         function closeModal() { document.getElementById('addModal').style.display = 'none'; }
 
         async function deleteSchedule(id) {
+            if(!confirm('ลบวิชานี้ใช่ไหมคะ?')) return;
             await fetch(`/api/schedule/${id}`, { method: 'DELETE' });
             fetchSchedule();
         }
