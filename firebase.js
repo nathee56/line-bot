@@ -2,13 +2,26 @@ const admin = require('firebase-admin');
 require('dotenv').config();
 
 let serviceAccount;
-try {
-    serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-    if (serviceAccount && serviceAccount.private_key) {
-        serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
+const saJson = process.env.FIREBASE_SERVICE_ACCOUNT;
+
+if (saJson) {
+    try {
+        serviceAccount = JSON.parse(saJson);
+        if (serviceAccount.private_key) {
+            serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
+        }
+    } catch (e) {
+        console.error('Failed to parse FIREBASE_SERVICE_ACCOUNT JSON');
     }
-} catch (e) {
-    console.error('Failed to parse FIREBASE_SERVICE_ACCOUNT. Ensure it is a valid JSON string.');
+}
+
+// If JSON parse failed or not provided, try individual variables
+if (!serviceAccount && process.env.FB_PRIVATE_KEY) {
+    serviceAccount = {
+        projectId: process.env.FB_PROJECT_ID,
+        clientEmail: process.env.FB_CLIENT_EMAIL,
+        privateKey: process.env.FB_PRIVATE_KEY.replace(/\\n/g, '\n')
+    };
 }
 
 if (serviceAccount && !admin.apps.length) {
