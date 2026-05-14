@@ -216,8 +216,7 @@ function createGeneralResponseFlex(text) {
                     wrap: true,
                     margin: "md",
                     size: "md",
-                    color: "#333333",
-                    lineSpacing: "sm"
+                    color: "#333333"
                 }
             ],
             paddingAll: "xl"
