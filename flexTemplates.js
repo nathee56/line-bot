@@ -186,4 +186,49 @@ function createNotificationFlex(title, deadline, timeRemaining) {
     };
 }
 
-module.exports = { createTaskFlex, createTaskListFlex, createNotificationFlex };
+function createGeneralResponseFlex(text) {
+    return {
+        type: "bubble",
+        body: {
+            type: "box",
+            layout: "vertical",
+            contents: [
+                {
+                    type: "box",
+                    layout: "vertical",
+                    contents: [
+                        {
+                            type: "text",
+                            text: "Assistant",
+                            color: "#FFFFFF",
+                            size: "xs",
+                            weight: "bold"
+                        }
+                    ],
+                    backgroundColor: "#11998e",
+                    paddingAll: "sm",
+                    cornerRadius: "md",
+                    width: "70px",
+                    alignItems: "center"
+                },
+                {
+                    type: "text",
+                    text: text,
+                    wrap: true,
+                    margin: "md",
+                    size: "md",
+                    color: "#333333",
+                    lineSpacing: "sm"
+                }
+            ],
+            paddingAll: "xl"
+        },
+        styles: {
+            body: {
+                backgroundColor: "#f9f9f9"
+            }
+        }
+    };
+}
+
+module.exports = { createTaskFlex, createTaskListFlex, createNotificationFlex, createGeneralResponseFlex };

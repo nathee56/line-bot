@@ -1,7 +1,7 @@
 const { askAI } = require('./thaillm');
 const { saveTask, markDone, getTasks } = require('./firebase');
 const { replyMessage, sendFlexMessage } = require('./lineClient');
-const { createTaskFlex, createTaskListFlex } = require('./flexTemplates');
+const { createTaskFlex, createTaskListFlex, createGeneralResponseFlex } = require('./flexTemplates');
 
 async function handleMessage(event) {
     if (event.type !== 'message' || event.message.type !== 'text') {
@@ -31,7 +31,7 @@ async function handleMessage(event) {
         }
 
         if (!result) {
-            return await replyMessage(replyToken, "ขออภัย ฉันไม่เข้าใจคำสั่งของคุณ");
+            return await sendFlexMessage(replyToken, "บอทไม่เข้าใจ", createGeneralResponseFlex("ขออภัยค่ะ ฉันไม่เข้าใจคำสั่งของคุณ ลองพิมพ์ใหม่อีกครั้งนะคะ"));
         }
 
         const { intent, task, doneId, reply } = result;
@@ -47,11 +47,11 @@ async function handleMessage(event) {
             return await sendFlexMessage(replyToken, "รายการงานของคุณ", createTaskListFlex(currentTasks));
         }
 
-        await replyMessage(replyToken, reply || "ดำเนินการเรียบร้อยแล้วค่ะ");
+        await sendFlexMessage(replyToken, "ตอบกลับ", createGeneralResponseFlex(reply || "ดำเนินการเรียบร้อยแล้วค่ะ"));
 
     } catch (error) {
         console.error('Error in handleMessage:', error);
-        await replyMessage(replyToken, "เกิดข้อผิดพลาดในการประมวลผล กรุณาลองใหม่อีกครั้ง");
+        await sendFlexMessage(replyToken, "เกิดข้อผิดพลาด", createGeneralResponseFlex("เกิดข้อผิดพลาดในการประมวลผล กรุณาลองใหม่อีกครั้งนะคะ 🙏"));
     }
 }
 
