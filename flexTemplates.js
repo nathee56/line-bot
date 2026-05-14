@@ -12,8 +12,8 @@ function createTaskFlex(title, deadline) {
                     type: "image",
                     url: CHICK_ICON,
                     position: "absolute",
-                    offsetEnd: "-10px",
-                    offsetTop: "-10px",
+                    offsetEnd: "0px",
+                    offsetTop: "0px",
                     size: "xs",
                     aspectMode: "fit"
                 },
@@ -131,8 +131,7 @@ function createTaskListFlex(tasks) {
                 text: `🕒 ${t.deadline}`,
                 size: "xs",
                 color: "#999999",
-                margin: "sm",
-                paddingStart: "xxl"
+                margin: "sm"
             },
             {
                 type: "separator",
