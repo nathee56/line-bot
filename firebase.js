@@ -45,6 +45,9 @@ if (serviceAccount && !admin.apps.length) {
 }
 
 const db = admin.apps.length ? admin.firestore() : null;
+if (db) {
+    db.settings({ ignoreUndefinedProperties: true });
+}
 
 async function saveTask(userId, task) {
     if (!db) throw new Error('Firestore not initialized');
