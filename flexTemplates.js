@@ -300,4 +300,271 @@ function createGeneralResponseFlex(text) {
     };
 }
 
-module.exports = { createTaskFlex, createTaskListFlex, createNotificationFlex, createGeneralResponseFlex };
+function createSettingsFlex() {
+    return {
+        type: "bubble",
+        header: {
+            type: "box",
+            layout: "vertical",
+            contents: [
+                {
+                    type: "text",
+                    text: "ตั้งค่าการใช้งาน ⚙️",
+                    weight: "bold",
+                    color: "#FFFFFF",
+                    size: "md"
+                }
+            ],
+            backgroundColor: "#2C3E50"
+        },
+        body: {
+            type: "box",
+            layout: "vertical",
+            spacing: "md",
+            contents: [
+                {
+                    type: "box",
+                    layout: "horizontal",
+                    contents: [
+                        {
+                            type: "text",
+                            text: "ภาษาที่ใช้งาน",
+                            flex: 1,
+                            size: "sm",
+                            color: "#666666"
+                        },
+                        {
+                            type: "text",
+                            text: "ภาษาไทย 🇹🇭",
+                            flex: 0,
+                            size: "sm",
+                            weight: "bold",
+                            color: "#FF8C2A"
+                        }
+                    ]
+                },
+                {
+                    type: "separator"
+                },
+                {
+                    type: "box",
+                    layout: "horizontal",
+                    contents: [
+                        {
+                            type: "text",
+                            text: "โหมดผู้ช่วย",
+                            flex: 1,
+                            size: "sm",
+                            color: "#666666"
+                        },
+                        {
+                            type: "text",
+                            text: "สุภาพ",
+                            flex: 0,
+                            size: "sm",
+                            weight: "bold",
+                            color: "#FF8C2A"
+                        }
+                    ]
+                }
+            ]
+        },
+        footer: {
+            type: "box",
+            layout: "vertical",
+            contents: [
+                {
+                    type: "button",
+                    action: {
+                        type: "message",
+                        label: "ลบข้อมูลทั้งหมด",
+                        text: "ลบข้อมูลของฉันทั้งหมด"
+                    },
+                    style: "link",
+                    color: "#EF4444"
+                }
+            ]
+        }
+    };
+}
+
+function createNotificationSettingsFlex() {
+    return {
+        type: "bubble",
+        header: {
+            type: "box",
+            layout: "vertical",
+            contents: [
+                {
+                    type: "text",
+                    text: "ตั้งค่าการแจ้งเตือน 🔔",
+                    weight: "bold",
+                    color: "#FFFFFF"
+                }
+            ],
+            backgroundColor: "#F59E0B"
+        },
+        body: {
+            type: "box",
+            layout: "vertical",
+            spacing: "lg",
+            contents: [
+                {
+                    type: "box",
+                    layout: "horizontal",
+                    contents: [
+                        {
+                            type: "text",
+                            text: "แจ้งเตือนล่วงหน้า 24 ชม.",
+                            size: "sm",
+                            gravity: "center"
+                        },
+                        {
+                            type: "button",
+                            action: {
+                                type: "message",
+                                label: "เปิดอยู่ ✅",
+                                text: "ตั้งค่าแจ้งเตือน 24 ชม."
+                            },
+                            height: "sm",
+                            style: "secondary",
+                            flex: 0
+                        }
+                    ]
+                },
+                {
+                    type: "box",
+                    layout: "horizontal",
+                    contents: [
+                        {
+                            type: "text",
+                            text: "แจ้งเตือนล่วงหน้า 1 ชม.",
+                            size: "sm",
+                            gravity: "center"
+                        },
+                        {
+                            type: "button",
+                            action: {
+                                type: "message",
+                                label: "เปิดอยู่ ✅",
+                                text: "ตั้งค่าแจ้งเตือน 1 ชม."
+                            },
+                            height: "sm",
+                            style: "secondary",
+                            flex: 0
+                        }
+                    ]
+                }
+            ]
+        }
+    };
+}
+
+function createSummaryDashboardFlex(doneCount, pendingCount) {
+    const total = doneCount + pendingCount;
+    const progress = total > 0 ? (doneCount / total) * 100 : 0;
+    
+    return {
+        type: "bubble",
+        body: {
+            type: "box",
+            layout: "vertical",
+            contents: [
+                {
+                    type: "text",
+                    text: "สรุปผลงานของคุณ 🚀",
+                    weight: "bold",
+                    size: "lg",
+                    margin: "md"
+                },
+                {
+                    type: "box",
+                    layout: "horizontal",
+                    margin: "xl",
+                    spacing: "md",
+                    contents: [
+                        {
+                            type: "box",
+                            layout: "vertical",
+                            flex: 1,
+                            backgroundColor: "#E8F5E9",
+                            paddingAll: "md",
+                            cornerRadius: "md",
+                            contents: [
+                                {
+                                    type: "text",
+                                    text: "เสร็จแล้ว",
+                                    size: "xs",
+                                    color: "#2E7D32"
+                                },
+                                {
+                                    type: "text",
+                                    text: `${doneCount}`,
+                                    weight: "bold",
+                                    size: "xl",
+                                    color: "#2E7D32"
+                                }
+                            ]
+                        },
+                        {
+                            type: "box",
+                            layout: "vertical",
+                            flex: 1,
+                            backgroundColor: "#FFF3E0",
+                            paddingAll: "md",
+                            cornerRadius: "md",
+                            contents: [
+                                {
+                                    type: "text",
+                                    text: "ค้างอยู่",
+                                    size: "xs",
+                                    color: "#E65100"
+                                },
+                                {
+                                    type: "text",
+                                    text: `${pendingCount}`,
+                                    weight: "bold",
+                                    size: "xl",
+                                    color: "#E65100"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    type: "box",
+                    layout: "vertical",
+                    margin: "xl",
+                    contents: [
+                        {
+                            type: "text",
+                            text: `ความคืบหน้า ${Math.round(progress)}%`,
+                            size: "xs",
+                            color: "#999999",
+                            align: "end"
+                        },
+                        {
+                            type: "box",
+                            layout: "vertical",
+                            backgroundColor: "#eeeeee",
+                            height: "6px",
+                            cornerRadius: "xl",
+                            margin: "sm",
+                            contents: [
+                                {
+                                    type: "box",
+                                    layout: "vertical",
+                                    backgroundColor: "#FF8C2A",
+                                    width: `${progress}%`,
+                                    height: "6px"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    };
+}
+
+module.exports = { createTaskFlex, createTaskListFlex, createNotificationFlex, createGeneralResponseFlex, createSettingsFlex, createNotificationSettingsFlex, createSummaryDashboardFlex };

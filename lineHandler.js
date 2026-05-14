@@ -1,7 +1,7 @@
 const { askAI } = require('./thaillm');
 const { saveTask, markDone, getTasks } = require('./firebase');
 const { replyMessage, sendFlexMessage } = require('./lineClient');
-const { createTaskFlex, createTaskListFlex, createGeneralResponseFlex } = require('./flexTemplates');
+const { createTaskFlex, createTaskListFlex, createGeneralResponseFlex, createSettingsFlex, createNotificationSettingsFlex, createSummaryDashboardFlex } = require('./flexTemplates');
 
 async function handleMessage(event) {
     if (event.type !== 'message' || event.message.type !== 'text') {
@@ -37,17 +37,39 @@ async function handleMessage(event) {
             return await sendFlexMessage(replyToken, "บอทไม่เข้าใจ", createGeneralResponseFlex("ขออภัยค่ะ ฉันไม่เข้าใจคำสั่งของคุณ ลองพิมพ์ใหม่อีกครั้งนะคะ"));
         }
 
-        const { intent, task, doneId, reply } = result;
+        const { intent, task, deadline, doneId, reply } = result;
 
+        // Explicit Command Handling for Rich Menu
+        if (userText === 'เพิ่มงานใหม่') {
+            return await sendFlexMessage(replyToken, "เพิ่มงานใหม่", createGeneralResponseFlex("ต้องการให้ Chicku ช่วยจำเรื่องอะไรคะ? พิมพ์รายละเอียดงานและวันเวลามาได้เลย! \n\nตัวอย่าง: 'ซักผ้า พรุ่งนี้ 8 โมงเช้า'"));
+        }
+        
+        if (userText === 'ตั้งค่าการแจ้งเตือน') {
+            return await sendFlexMessage(replyToken, "ตั้งค่าการแจ้งเตือน", createNotificationSettingsFlex());
+        }
+        
+        if (userText === 'ตั้งค่า') {
+            return await sendFlexMessage(replyToken, "ตั้งค่า", createSettingsFlex());
+        }
+        
+        if (userText === 'สรุปผลงาน') {
+            const currentTasks = await getTasks(userId);
+            const doneCount = 0; // ในอนาคตสามารถนับจาก isDone: true ได้
+            const pendingCount = currentTasks.length;
+            return await sendFlexMessage(replyToken, "สรุปผลงาน", createSummaryDashboardFlex(doneCount, pendingCount));
+        }
+
+        if (intent === 'list_tasks' || userText.includes('รายการ') || userText.includes('งานทั้งหมด') || userText === 'ขอดูรายการงานทั้งหมด') {
+            const currentTasks = await getTasks(userId);
+            return await sendFlexMessage(replyToken, "รายการงานของคุณ", createTaskListFlex(currentTasks));
+        }
+        
         if (intent === 'add_task' && task) {
-            await saveTask(userId, task);
-            return await sendFlexMessage(replyToken, "บันทึกงานใหม่สำเร็จ", createTaskFlex(task.title, task.deadline));
+            await saveTask(userId, task, deadline);
+            return await sendFlexMessage(replyToken, "บันทึกงานใหม่สำเร็จ", createTaskFlex(task, deadline));
         } else if (intent === 'mark_done' && doneId) {
             await markDone(doneId);
             return await replyMessage(replyToken, reply || "ทำเครื่องหมายว่าเสร็จสิ้นแล้วค่ะ ✅");
-        } else if (intent === 'list_tasks' || userText.includes('รายการ') || userText.includes('งานทั้งหมด')) {
-            const currentTasks = await getTasks(userId);
-            return await sendFlexMessage(replyToken, "รายการงานของคุณ", createTaskListFlex(currentTasks));
         }
 
         await sendFlexMessage(replyToken, "ตอบกลับ", createGeneralResponseFlex(reply || "ดำเนินการเรียบร้อยแล้วค่ะ"));
