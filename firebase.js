@@ -15,19 +15,25 @@ if (saJson) {
     }
 }
 
-// If JSON parse failed or not provided, try individual variables
-if (!serviceAccount && process.env.FB_PRIVATE_KEY) {
-    let pk = process.env.FB_PRIVATE_KEY;
-    // Remove potential leading/trailing quotes that might come from some env managers
-    pk = pk.replace(/^["']|["']$/g, '');
-    // Ensure newlines are actual newlines
-    pk = pk.replace(/\\n/g, '\n');
-    
-    serviceAccount = {
-        projectId: process.env.FB_PROJECT_ID,
-        clientEmail: process.env.FB_CLIENT_EMAIL,
-        privateKey: pk
-    };
+// If JSON parse failed or not provided, try individual variables or base64
+if (!serviceAccount) {
+    if (process.env.FB_PRIVATE_KEY_BASE64) {
+        const decodedKey = Buffer.from(process.env.FB_PRIVATE_KEY_BASE64, 'base64').toString('utf8');
+        serviceAccount = {
+            projectId: process.env.FB_PROJECT_ID,
+            clientEmail: process.env.FB_CLIENT_EMAIL,
+            privateKey: decodedKey
+        };
+    } else if (process.env.FB_PRIVATE_KEY) {
+        let pk = process.env.FB_PRIVATE_KEY;
+        pk = pk.replace(/^["']|["']$/g, '');
+        pk = pk.replace(/\\n/g, '\n');
+        serviceAccount = {
+            projectId: process.env.FB_PROJECT_ID,
+            clientEmail: process.env.FB_CLIENT_EMAIL,
+            privateKey: pk
+        };
+    }
 }
 
 if (serviceAccount && !admin.apps.length) {
