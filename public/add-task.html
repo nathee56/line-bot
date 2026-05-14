@@ -2,57 +2,10 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>เพิ่มงานใหม่ - Chicku Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>เพิ่มงานใหม่ 🐥</title>
     <link rel="stylesheet" href="styles.css">
     <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-    <style>
-        .radio-group {
-            display: flex;
-            gap: 10px;
-            margin-top: 5px;
-        }
-        .radio-item {
-            flex: 1;
-            position: relative;
-        }
-        .radio-item input[type="radio"] {
-            position: absolute;
-            opacity: 0;
-        }
-        .radio-label {
-            display: block;
-            text-align: center;
-            padding: 12px 10px;
-            border-radius: 16px;
-            border: 2px solid var(--border-light);
-            border-bottom: 5px solid var(--border-light);
-            cursor: pointer;
-            transition: all 0.1s;
-            font-size: 14px;
-            font-weight: 800;
-            background-color: white;
-            color: var(--text-muted);
-        }
-        
-        .radio-item input[type="radio"]:checked + .radio-label {
-            border-color: var(--primary);
-            border-bottom: 2px solid var(--primary);
-            transform: translateY(3px);
-            background-color: #FFF3E0;
-            color: var(--primary);
-        }
-
-        .success-message {
-            display: none;
-            text-align: center;
-            padding: 20px;
-        }
-        .success-message img {
-            width: 80px;
-            margin-bottom: 15px;
-        }
-    </style>
 </head>
 <body>
 
@@ -62,60 +15,58 @@
         <div class="loader-text">กำลังโหลด...</div>
     </div>
 
+    <!-- Success Overlay -->
+    <div class="overlay" id="success-overlay">
+        <div class="popup-card">
+            <img src="https://cdn-icons-png.flaticon.com/512/2663/2663067.png" width="80" class="mascot-img"><br><br>
+            <h2 class="text-primary">✅ Chicku จดให้แล้ว!</h2>
+            <p class="text-muted">กำลังพากลับหน้าหลัก...</p>
+        </div>
+    </div>
+
     <div class="container">
         <div class="mascot-container animate-fade-up">
             <img src="https://cdn-icons-png.flaticon.com/512/2663/2663067.png" alt="Chicku" class="mascot-img">
-            <h2 class="text-primary mt-1">เพิ่มงานใหม่ 📝</h2>
+            <h2 class="text-primary mt-1">เพิ่มงานใหม่</h2>
+            <p class="text-muted">บอก Chicku ว่ามีงานอะไร! 🐥</p>
         </div>
 
-        <div id="form-container" class="card animate-fade-up delay-1">
+        <div class="card animate-fade-up delay-1">
             <form id="add-task-form">
                 <div class="form-group">
-                    <label class="form-label">ชื่องาน</label>
-                    <input type="text" id="title" class="form-control" placeholder="เช่น ซักผ้า, ส่งการบ้าน" required>
+                    <label class="form-label">📝 ชื่องาน</label>
+                    <input type="text" id="title" class="form-control" placeholder="เช่น ส่งรายงาน, ทำการบ้าน..." required>
                 </div>
-                
+
                 <div class="form-group">
-                    <label class="form-label">วันกำหนดส่ง (Deadline)</label>
-                    <input type="datetime-local" id="deadline" class="form-control" required>
+                    <label class="form-label">📅 กำหนดส่ง</label>
+                    <input type="datetime-local" id="deadline" class="form-control">
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">ความด่วน</label>
-                    <div class="radio-group">
-                        <div class="radio-item">
-                            <input type="radio" name="priority" id="priority-normal" value="🟢 ปกติ" checked>
-                            <label class="radio-label" for="priority-normal">🟢 ปกติ</label>
-                        </div>
-                        <div class="radio-item">
-                            <input type="radio" name="priority" id="priority-medium" value="🟡 ปานกลาง">
-                            <label class="radio-label" for="priority-medium">🟡 ปานกลาง</label>
-                        </div>
-                        <div class="radio-item">
-                            <input type="radio" name="priority" id="priority-high" value="🔴 ด่วนมาก">
-                            <label class="radio-label" for="priority-high">🔴 ด่วนมาก</label>
-                        </div>
+                    <div class="priority-selector" id="priority-selector">
+                        <button type="button" class="priority-btn" data-priority="urgent">🔴 ด่วนมาก</button>
+                        <button type="button" class="priority-btn active" data-priority="normal">🟡 ปานกลาง</button>
+                        <button type="button" class="priority-btn" data-priority="low">🟢 ปกติ</button>
                     </div>
+                    <input type="hidden" id="priority" value="ปกติ">
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">หมายเหตุ</label>
-                    <textarea id="note" class="form-control" rows="2" placeholder="รายละเอียดเพิ่มเติม..."></textarea>
+                    <label class="form-label">💬 หมายเหตุ (ถ้ามี)</label>
+                    <textarea id="note" class="form-control" rows="3" placeholder="เพิ่มรายละเอียดเพิ่มเติม..."></textarea>
                 </div>
 
-                <button type="submit" class="btn btn-primary mt-2">บันทึกงาน</button>
+                <button type="submit" class="btn btn-primary mt-1">
+                    🐥 ให้ Chicku จดให้!
+                </button>
             </form>
         </div>
-
-        <div id="success-message" class="card success-message">
-            <img src="https://cdn-icons-png.flaticon.com/512/2663/2663067.png" alt="Chicku">
-            <h3 class="text-success">🐥 Chicku จดให้แล้ว!</h3>
-            <p class="text-muted mt-1">กำลังพากลับไปหน้าหลัก...</p>
-        </div>
-
     </div>
 
-    <div class="bottom-nav">
+    <!-- Bottom Navigation -->
+    <div class="nav-bar">
         <a href="index.html" class="nav-item" id="nav-dashboard">
             <span class="nav-icon">📊</span>
             Dashboard
@@ -132,6 +83,7 @@
 
     <script>
         let userId = '';
+        let selectedPriority = 'ปกติ';
 
         async function initLiff() {
             try {
@@ -152,8 +104,6 @@
                 localStorage.setItem('chicku_userId', userId);
                 updateNavLinks();
             }
-            
-            // ซ่อนหน้าต่างโหลดเมื่อ LIFF ทำงานเสร็จ
             document.getElementById('global-loader').classList.add('hide-loader');
         }
 
@@ -163,42 +113,50 @@
             document.getElementById('nav-schedule').href = `schedule.html?userId=${userId}`;
         }
 
+        // Priority Selector Logic
+        document.querySelectorAll('.priority-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.priority-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                const p = btn.getAttribute('data-priority');
+                selectedPriority = p === 'urgent' ? 'ด่วนมาก' : (p === 'normal' ? 'ปกติ' : 'ต่ำ');
+                document.getElementById('priority').value = selectedPriority;
+            });
+        });
+
         document.getElementById('add-task-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             if (!userId) return alert('ไม่พบข้อมูลผู้ใช้');
-            
-            const title = document.getElementById('title').value;
-            const deadlineRaw = document.getElementById('deadline').value;
-            const priority = document.querySelector('input[name="priority"]:checked').value;
-            const note = document.getElementById('note').value;
-            
-            const deadline = deadlineRaw.replace('T', ' ');
-            const fullTitle = note ? `${title} (${note})` : title;
+
+            const taskData = {
+                title: document.getElementById('title').value,
+                deadline: document.getElementById('deadline').value,
+                priority: document.getElementById('priority').value,
+                note: document.getElementById('note').value
+            };
 
             try {
                 const res = await fetch('/api/tasks', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userId, title: fullTitle, deadline, priority })
+                    body: JSON.stringify({ userId, ...taskData })
                 });
 
                 if (res.ok) {
-                    document.getElementById('form-container').style.display = 'none';
-                    document.getElementById('success-message').style.display = 'block';
-                    
+                    document.getElementById('success-overlay').style.display = 'flex';
                     setTimeout(() => {
                         if (liff.isInClient()) {
-                            liff.closeWindow(); // ปิดหน้าต่างกลับไปหน้าแชท LINE
+                            liff.closeWindow();
                         } else {
-                            window.location.href = `index.html?userId=${userId}`; // ถ้าเปิดในเบราว์เซอร์ปกติให้กลับหน้าแรก
+                            window.location.href = `index.html?userId=${userId}`;
                         }
-                    }, 2000);
+                    }, 1500);
                 } else {
-                    alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+                    alert('เกิดข้อผิดพลาด');
                 }
-            } catch (err) {
-                console.error(err);
-                alert('เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์');
+            } catch (error) {
+                alert('เกิดข้อผิดพลาดในการเชื่อมต่อ');
             }
         });
 

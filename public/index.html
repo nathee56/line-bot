@@ -2,70 +2,10 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chicku Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Chicku Dashboard 🐥</title>
     <link rel="stylesheet" href="styles.css">
     <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-    <style>
-        .stats-container {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-        .stat-card {
-            background: white;
-            border-radius: 20px;
-            border: 2px solid var(--border-light);
-            border-bottom: 5px solid var(--border-light);
-            padding: 15px 10px;
-            text-align: center;
-            transition: transform 0.2s;
-        }
-        .stat-card .num {
-            font-size: 28px;
-            font-weight: 800;
-            color: var(--primary);
-        }
-        .stat-card .label {
-            font-size: 13px;
-            font-weight: 800;
-            color: var(--text-muted);
-        }
-        
-        .task-list {
-            margin-top: 20px;
-        }
-        .task-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .task-info h4 {
-            margin-bottom: 6px;
-            font-size: 18px;
-        }
-        .task-info .meta {
-            font-size: 13px;
-            color: var(--text-muted);
-            font-weight: 500;
-        }
-        .task-actions {
-            display: flex;
-            gap: 10px;
-        }
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--text-muted);
-            font-weight: 800;
-        }
-        .empty-state img {
-            width: 90px;
-            opacity: 0.8;
-            margin-bottom: 15px;
-        }
-    </style>
 </head>
 <body>
 
@@ -76,37 +16,47 @@
     </div>
 
     <div class="container">
-        <!-- มาสคอตตรงกลาง -->
+        <!-- Header Section -->
         <div class="mascot-container animate-fade-up">
             <img src="https://cdn-icons-png.flaticon.com/512/2663/2663067.png" alt="Chicku" class="mascot-img">
-            <h2 class="text-primary mt-1">Chicku Dashboard</h2>
+            <h2 class="text-primary mt-1">Chicku Dashboard 🐥</h2>
+            <p id="today-date" style="font-size: 14px; color: var(--text-muted); font-weight: 600;"></p>
         </div>
 
-        <div class="stats-container animate-fade-up delay-1">
-            <div class="stat-card">
-                <div class="num" id="stat-total">0</div>
-                <div class="label">งานทั้งหมด</div>
+        <!-- Summary Cards -->
+        <div class="summary-container animate-fade-up delay-1">
+            <div class="summary-item summary-total">
+                <span class="icon">📋</span>
+                <span class="value" id="count-total">0</span>
+                <span class="label">งานทั้งหมด</span>
             </div>
-            <div class="stat-card">
-                <div class="num text-danger" id="stat-urgent">0</div>
-                <div class="label">ด่วนมาก</div>
+            <div class="summary-item summary-urgent">
+                <span class="icon">🚨</span>
+                <span class="value" id="count-urgent">0</span>
+                <span class="label">งานด่วน</span>
             </div>
-            <div class="stat-card">
-                <div class="num text-success" id="stat-done">0</div>
-                <div class="label">เสร็จแล้ว</div>
+            <div class="summary-item summary-done">
+                <span class="icon">✅</span>
+                <span class="value" id="count-done">0</span>
+                <span class="label">เสร็จแล้ว</span>
             </div>
         </div>
 
-        <h3 class="animate-fade-up delay-2">รายการงานของคุณ 📋</h3>
-        <div class="task-list animate-fade-up delay-3" id="task-list">
-            <div class="empty-state">
-                <img src="https://cdn-icons-png.flaticon.com/512/2663/2663067.png" alt="Chicku" class="mascot-img" style="width: 60px;">
-                <p>กำลังโหลดข้อมูล...</p>
+        <!-- Task List Section -->
+        <div class="animate-fade-up delay-2">
+            <h3 class="mb-2">รายการงานของคุณ 📋</h3>
+            <div id="task-list">
+                <!-- Tasks will be rendered here -->
+                <div class="text-center text-muted card" style="padding: 40px;">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2663/2663067.png" width="60" class="mascot-img" style="opacity: 0.8"><br><br>
+                    กำลังพาเพื่อนมา...
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="bottom-nav">
+    <!-- Bottom Navigation -->
+    <div class="nav-bar">
         <a href="index.html" class="nav-item active" id="nav-dashboard">
             <span class="nav-icon">📊</span>
             Dashboard
@@ -123,11 +73,10 @@
 
     <script>
         let userId = '';
-        
+
         async function initLiff() {
             try {
-                // เปลี่ยน YOUR_LIFF_ID เป็น LIFF ID จริงจาก LINE Developers
-                await liff.init({ liffId: "2010087033-ALab9gXG" }); 
+                await liff.init({ liffId: "2010087033-1VBJnBG1" }); 
                 if (liff.isLoggedIn()) {
                     const profile = await liff.getProfile();
                     userId = profile.userId;
@@ -136,7 +85,6 @@
                 }
             } catch (err) {
                 console.error('LIFF Error:', err);
-                // Fallback for testing
                 const urlParams = new URLSearchParams(window.location.search);
                 userId = urlParams.get('userId') || localStorage.getItem('chicku_userId') || 'test_user_123';
             }
@@ -146,6 +94,13 @@
                 updateNavLinks();
                 fetchTasks();
             }
+            displayDate();
+        }
+
+        function displayDate() {
+            const options = { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' };
+            const today = new Date().toLocaleDateString('th-TH', options);
+            document.getElementById('today-date').innerText = today;
         }
 
         function updateNavLinks() {
@@ -159,79 +114,109 @@
                 const res = await fetch(`/api/tasks?userId=${userId}`);
                 const tasks = await res.json();
                 renderTasks(tasks);
+                updateSummary(tasks);
             } catch (error) {
                 console.error('Error fetching tasks:', error);
                 document.getElementById('task-list').innerHTML = `
-                    <div class="empty-state">
-                        <p>เกิดข้อผิดพลาดในการโหลดข้อมูล</p>
+                    <div class="card text-center">
+                        <p>เกิดข้อผิดพลาดในการโหลดข้อมูล 🐥</p>
                     </div>`;
             } finally {
                 document.getElementById('global-loader').classList.add('hide-loader');
             }
         }
 
-        function getBadgeClass(priority) {
-            if (priority === 'high' || priority === '🔴 ด่วนมาก') return 'badge-high';
-            if (priority === 'medium' || priority === '🟡 ปานกลาง') return 'badge-medium';
-            return 'badge-low';
+        function updateSummary(tasks) {
+            const total = tasks.length;
+            const urgent = tasks.filter(t => t.priority === 'ด่วนมาก' || t.priority === 'urgent').length;
+            // Note: Since API only returns not-done tasks, we might want to fetch stats differently 
+            // but for now we'll show active counts.
+            document.getElementById('count-total').innerText = total;
+            document.getElementById('count-urgent').innerText = urgent;
+            // Let's assume 'done' is a cumulative stat or just placeholders for now
+            // We'll use local storage or just keep it 0 if not tracked.
+            const doneCount = localStorage.getItem(`done_count_${userId}`) || 0;
+            document.getElementById('count-done').innerText = doneCount;
         }
 
         function renderTasks(tasks) {
-            const taskList = document.getElementById('task-list');
-            
-            document.getElementById('stat-total').textContent = tasks.length;
-            document.getElementById('stat-urgent').textContent = tasks.filter(t => t.priority === 'high' || t.priority === '🔴 ด่วนมาก').length;
-            document.getElementById('stat-done').textContent = '0';
-
+            const container = document.getElementById('task-list');
             if (tasks.length === 0) {
-                taskList.innerHTML = `
-                    <div class="empty-state">
-                        <img src="https://cdn-icons-png.flaticon.com/512/2663/2663067.png" alt="Chicku">
-                        <p>ไม่มีงานค้างนะ เก่งมาก! 🎉</p>
+                container.innerHTML = `
+                    <div class="text-center card" style="padding: 40px; border: 2px dashed #FFDAB9; background: transparent;">
+                        <img src="https://cdn-icons-png.flaticon.com/512/2663/2663067.png" width="60" style="opacity: 0.5; filter: grayscale(100%);"><br><br>
+                        <p style="color: var(--text-muted); font-weight: 600;">🐥 ไม่มีงานค้างเลย เก่งมาก!</p>
                     </div>`;
                 return;
             }
 
-            let html = '';
-            tasks.forEach((task, index) => {
-                const delayClass = `delay-${Math.min(index + 1, 5)}`;
-                html += `
-                    <div class="card task-item animate-fade-up ${delayClass}" id="task-${task.id}">
-                        <div class="task-info">
-                            <h4>${task.title}</h4>
-                            <div class="meta">
-                                <span class="badge ${getBadgeClass(task.priority)}">${task.priority || 'ปกติ'}</span>
-                                <span style="margin-left:8px;">🕒 ${task.deadline || 'ไม่ระบุ'}</span>
+            container.innerHTML = tasks.map((task, index) => {
+                const title = task.title || "ไม่ระบุชื่องาน";
+                const deadlineStr = task.deadline && task.deadline !== "ไม่ระบุ" 
+                    ? new Date(task.deadline).toLocaleString('th-TH', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+                    : "ไม่ระบุเวลา";
+                
+                const priorityClass = task.priority === 'ด่วนมาก' || task.priority === 'urgent' ? 'badge-urgent' : 
+                                     (task.priority === 'ปกติ' || task.priority === 'normal' ? 'badge-normal' : 'badge-low');
+                const priorityEmoji = task.priority === 'ด่วนมาก' || task.priority === 'urgent' ? '🔴' : 
+                                      (task.priority === 'ปกติ' || task.priority === 'normal' ? '🟡' : '🟢');
+                const priorityLabel = task.priority === 'ด่วนมาก' || task.priority === 'urgent' ? 'ด่วนมาก' : 
+                                      (task.priority === 'ปกติ' || task.priority === 'normal' ? 'ปานกลาง' : 'ปกติ');
+
+                return `
+                    <div class="task-item animate-fade-up" style="animation-delay: ${index * 0.1}s" id="task-${task.id}">
+                        <div class="task-content">
+                            <div class="task-title">${title}</div>
+                            <div class="task-meta">
+                                <span class="badge ${priorityClass}">${priorityEmoji} ${priorityLabel}</span>
+                                <span>📅 ${deadlineStr}</span>
                             </div>
                         </div>
                         <div class="task-actions">
-                            <button class="btn btn-sm btn-success" onclick="markDone('${task.id}')">✓</button>
-                            <button class="btn btn-sm btn-danger" onclick="deleteTask('${task.id}')">✗</button>
+                            <button class="btn-action btn-success" onclick="completeTask('${task.id}', '${task.title}')">✅ เสร็จแล้ว</button>
+                            <button class="btn-action btn-danger" style="flex: 0.4;" onclick="deleteTask('${task.id}')">🗑️ ลบ</button>
                         </div>
                     </div>
                 `;
-            });
-            taskList.innerHTML = html;
+            }).join('');
         }
 
-        async function markDone(id) {
-            if(!confirm('ทำเครื่องหมายว่าเสร็จแล้ว?')) return;
+        async function completeTask(id, title) {
+            if (!confirm('เสร็จงานนี้แล้วใช่ไหมคะ? 🐥')) return;
+            
             try {
-                await fetch(`/api/tasks/${id}/done`, { method: 'PUT' });
-                document.getElementById(`task-${id}`).style.opacity = '0.5';
-                setTimeout(() => fetchTasks(), 500);
-            } catch (e) {
+                const res = await fetch(`/api/tasks/${id}/done`, { method: 'POST' });
+                if (res.ok) {
+                    const el = document.getElementById(`task-${id}`);
+                    el.style.transition = 'all 0.5s';
+                    el.style.opacity = '0';
+                    el.style.transform = 'translateX(100px)';
+                    
+                    // Increment local done count for UI
+                    let doneCount = parseInt(localStorage.getItem(`done_count_${userId}`) || 0);
+                    localStorage.setItem(`done_count_${userId}`, doneCount + 1);
+                    document.getElementById('count-done').innerText = doneCount + 1;
+
+                    setTimeout(() => el.remove(), 500);
+                }
+            } catch (err) {
                 alert('เกิดข้อผิดพลาด');
             }
         }
 
         async function deleteTask(id) {
-            if(!confirm('ต้องการลบงานนี้ใช่ไหม?')) return;
+            if (!confirm('ต้องการลบงานนี้ใช่ไหมคะ? 🐥')) return;
+            
             try {
-                await fetch(`/api/tasks/${id}`, { method: 'DELETE' });
-                document.getElementById(`task-${id}`).remove();
-                fetchTasks();
-            } catch (e) {
+                const res = await fetch(`/api/tasks/${id}`, { method: 'DELETE' });
+                if (res.ok) {
+                    const el = document.getElementById(`task-${id}`);
+                    el.style.transition = 'all 0.5s';
+                    el.style.opacity = '0';
+                    el.style.transform = 'scale(0.8)';
+                    setTimeout(() => el.remove(), 500);
+                }
+            } catch (err) {
                 alert('เกิดข้อผิดพลาด');
             }
         }
