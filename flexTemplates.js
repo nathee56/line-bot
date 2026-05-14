@@ -474,8 +474,7 @@ function createSummaryDashboardFlex(doneCount, pendingCount) {
                     type: "text",
                     text: "สรุปผลงานของคุณ 🚀",
                     weight: "bold",
-                    size: "lg",
-                    margin: "md"
+                    size: "lg"
                 },
                 {
                     type: "box",
