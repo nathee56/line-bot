@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ตารางเรียน - Chicku Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .day-section {
+            margin-bottom: 20px;
+        }
+        .day-header {
+            padding: 10px;
+            background: #eee;
+            border-radius: 10px 10px 0 0;
+            font-weight: bold;
+            color: var(--text-main);
+        }
+        .day-today .day-header {
+            background: var(--primary);
+            color: white;
+        }
+        .schedule-list {
+            background: white;
+            border-radius: 0 0 10px 10px;
+            padding: 10px;
+            box-shadow: var(--shadow);
+        }
+        .schedule-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+            position: relative;
+        }
+        .schedule-item:last-child {
+            border-bottom: none;
+        }
+        .time-col {
+            flex: 0 0 100px;
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 14px;
+        }
+        .info-col {
+            flex: 1;
+        }
+        .subject-name {
+            font-weight: bold;
+            color: var(--text-main);
+            margin-bottom: 2px;
+        }
+        .room-name {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        .action-col {
+            flex: 0 0 40px;
+            text-align: right;
+        }
+        
+        /* Modal for adding class */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 400px;
+        }
+        .countdown {
+            text-align: center;
+            background: #FFF3E0;
+            color: var(--primary);
+            padding: 10px;
+            border-radius: 10px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="mascot-header">
+            <h2 class="text-primary">ตารางเรียน 📅</h2>
+        </div>
+
+        <button class="btn btn-primary" style="margin-bottom: 20px;" onclick="openModal()">+ เพิ่มวิชาเรียน</button>
+
+        <div id="next-class-countdown" class="countdown">
+            🐥 อีก <span id="cd-text">-- ชั่วโมง -- นาที</span> ถึงคาบถัดไป
+        </div>
+
+        <div id="schedule-container">
+            <div class="text-center text-muted" style="padding: 40px;">
+                <img src="https://cdn-icons-png.flaticon.com/512/2663/2663067.png" width="50" style="opacity: 0.5"><br>
+                กำลังโหลดตารางเรียน...
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Schedule Modal -->
+    <div class="modal-overlay" id="addModal">
+        <div class="modal-content">
+            <h3 class="mb-2">เพิ่มวิชาเรียนใหม่</h3>
+            <form id="add-schedule-form">
+                <div class="form-group">
+                    <label class="form-label">วัน</label>
+                    <select id="s-day" class="form-control" required>
+                        <option value="1">จันทร์</option>
+                        <option value="2">อังคาร</option>
+                        <option value="3">พุธ</option>
+                        <option value="4">พฤหัสบดี</option>
+                        <option value="5">ศุกร์</option>
+                        <option value="6">เสาร์</option>
+                        <option value="7">อาทิตย์</option>
+                    </select>
+                </div>
+                
+                <div class="d-flex gap-1">
+                    <div class="form-group" style="flex:1">
+                        <label class="form-label">เวลาเริ่ม</label>
+                        <input type="time" id="s-start" class="form-control" required>
+                    </div>
+                    <div class="form-group" style="flex:1">
+                        <label class="form-label">เวลาสิ้นสุด</label>
+                        <input type="time" id="s-end" class="form-control" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">ชื่อวิชา</label>
+                    <input type="text" id="s-subject" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">ห้องเรียน</label>
+                    <input type="text" id="s-room" class="form-control">
+                </div>
+
+                <div class="d-flex gap-1 mt-2">
+                    <button type="button" class="btn btn-outline" onclick="closeModal()">ยกเลิก</button>
+                    <button type="submit" class="btn btn-primary">บันทึก</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <a href="index.html" class="nav-item" id="nav-dashboard">
+            <span class="nav-icon">📊</span>
+            Dashboard
+        </a>
+        <a href="add-task.html" class="nav-item" id="nav-add">
+            <span class="nav-icon">➕</span>
+            เพิ่มงาน
+        </a>
+        <a href="schedule.html" class="nav-item active" id="nav-schedule">
+            <span class="nav-icon">📅</span>
+            ตารางเรียน
+        </a>
+    </div>
+
+    <script>
+        const userId = localStorage.getItem('chicku_userId') || 'test_user_123';
+        
+        document.getElementById('nav-dashboard').href = `index.html?userId=${userId}`;
+        document.getElementById('nav-add').href = `add-task.html?userId=${userId}`;
+        document.getElementById('nav-schedule').href = `schedule.html?userId=${userId}`;
+
+        const daysMap = {
+            1: "วันจันทร์", 2: "วันอังคาร", 3: "วันพุธ",
+            4: "วันพฤหัสบดี", 5: "วันศุกร์", 6: "วันเสาร์", 7: "วันอาทิตย์"
+        };
+
+        let schedules = [];
+
+        function openModal() {
+            document.getElementById('addModal').style.display = 'flex';
+        }
+        
+        function closeModal() {
+            document.getElementById('addModal').style.display = 'none';
+        }
+
+        async function fetchSchedule() {
+            try {
+                const res = await fetch(`/api/schedule?userId=${userId}`);
+                schedules = await res.json();
+                renderSchedule();
+                updateCountdown();
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        function renderSchedule() {
+            const container = document.getElementById('schedule-container');
+            const now = new Date();
+            let currentDay = now.getDay() === 0 ? 7 : now.getDay();
+
+            // Group by day
+            const grouped = {};
+            for(let i=1; i<=7; i++) grouped[i] = [];
+            
+            schedules.forEach(s => {
+                grouped[s.day].push(s);
+            });
+
+            let html = '';
+            for(let i=1; i<=7; i++) {
+                if (grouped[i].length === 0) continue; // Skip days with no classes
+                
+                const isToday = currentDay === i;
+                
+                // Sort by start time
+                grouped[i].sort((a,b) => a.startTime.localeCompare(b.startTime));
+
+                html += `
+                    <div class="day-section ${isToday ? 'day-today' : ''}">
+                        <div class="day-header">${daysMap[i]} ${isToday ? '(วันนี้)' : ''}</div>
+                        <div class="schedule-list">
+                `;
+
+                grouped[i].forEach(sch => {
+                    html += `
+                        <div class="schedule-item">
+                            <div class="time-col">
+                                ${sch.startTime} - ${sch.endTime}
+                            </div>
+                            <div class="info-col">
+                                <div class="subject-name">${sch.subject}</div>
+                                <div class="room-name">ห้อง: ${sch.room || '-'}</div>
+                            </div>
+                            <div class="action-col">
+                                <button class="btn btn-sm btn-danger" onclick="deleteSchedule('${sch.id}')">✗</button>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += `</div></div>`;
+            }
+
+            if (html === '') {
+                html = `
+                    <div class="text-center text-muted" style="padding: 40px; background: white; border-radius: var(--border-radius);">
+                        <img src="https://cdn-icons-png.flaticon.com/512/2663/2663067.png" width="60" style="margin-bottom:10px;"><br>
+                        ยังไม่มีตารางเรียนเลย กดเพิ่มวิชาได้เลยนะ 🐥
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+        }
+
+        function updateCountdown() {
+            const now = new Date();
+            let currentDay = now.getDay() === 0 ? 7 : now.getDay();
+            
+            // Find next class today
+            const todayClasses = schedules.filter(s => s.day === currentDay);
+            if(todayClasses.length === 0) return;
+
+            todayClasses.sort((a,b) => a.startTime.localeCompare(b.startTime));
+
+            let nextClass = null;
+            for(let c of todayClasses) {
+                const [h, m] = c.startTime.split(':');
+                const classTime = new Date();
+                classTime.setHours(parseInt(h), parseInt(m), 0, 0);
+                
+                if (classTime > now) {
+                    nextClass = classTime;
+                    break;
+                }
+            }
+
+            const cdDiv = document.getElementById('next-class-countdown');
+            if (nextClass) {
+                const diffMs = nextClass - now;
+                const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
+                const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+                
+                let text = '';
+                if (diffHrs > 0) text += `${diffHrs} ชั่วโมง `;
+                text += `${diffMins} นาที`;
+                
+                document.getElementById('cd-text').textContent = text;
+                cdDiv.style.display = 'block';
+            } else {
+                cdDiv.style.display = 'none';
+            }
+        }
+
+        document.getElementById('add-schedule-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const data = {
+                userId,
+                day: document.getElementById('s-day').value,
+                startTime: document.getElementById('s-start').value,
+                endTime: document.getElementById('s-end').value,
+                subject: document.getElementById('s-subject').value,
+                room: document.getElementById('s-room').value
+            };
+
+            try {
+                const res = await fetch('/api/schedule', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (res.ok) {
+                    closeModal();
+                    document.getElementById('add-schedule-form').reset();
+                    fetchSchedule();
+                } else {
+                    alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        });
+
+        async function deleteSchedule(id) {
+            if(!confirm('ต้องการลบวิชานี้ใช่ไหม?')) return;
+            try {
+                await fetch(`/api/schedule/${id}`, { method: 'DELETE' });
+                fetchSchedule();
+            } catch (e) {
+                alert('เกิดข้อผิดพลาด');
+            }
+        }
+
+        fetchSchedule();
+        setInterval(updateCountdown, 60000); // Update every minute
+    </script>
+</body>
+</html>

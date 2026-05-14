@@ -1,25 +1,35 @@
 const express = require('express');
 const crypto = require('crypto');
+const path = require('path');
 require('dotenv').config();
 
 const { handleMessage } = require('./lineHandler');
 const { startScheduler } = require('./scheduler');
+const { getTasks, saveTask, markDone, deleteTask, getSchedule, saveSchedule, deleteSchedule } = require('./firebase');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const CHANNEL_SECRET = process.env.LINE_CHANNEL_SECRET;
 
-// Middleware to capture rawBody for signature verification
-app.use(express.json({
+// Serve static files from 'public' directory
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Middleware to capture rawBody for signature verification (only for webhook)
+app.use('/webhook', express.json({
     verify: (req, res, buf) => {
         req.rawBody = buf;
     }
 }));
 
+// Standard JSON body parser for other API routes
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 app.get('/', (req, res) => {
-    res.send('Bot is running');
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// LINE Webhook
 app.post('/webhook', (req, res) => {
     const signature = req.headers['x-line-signature'];
     
@@ -27,7 +37,6 @@ app.post('/webhook', (req, res) => {
         return res.status(401).send('No signature');
     }
 
-    // Verify signature
     const hash = crypto
         .createHmac('SHA256', CHANNEL_SECRET)
         .update(req.rawBody)
@@ -45,6 +54,84 @@ app.post('/webhook', (req, res) => {
     }
 
     res.status(200).send('OK');
+});
+
+// API Routes for Tasks
+app.get('/api/tasks', async (req, res) => {
+    try {
+        const userId = req.query.userId;
+        if (!userId) return res.status(400).json({ error: 'userId is required' });
+        const tasks = await getTasks(userId);
+        res.json(tasks);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.post('/api/tasks', async (req, res) => {
+    try {
+        const { userId, title, deadline, priority } = req.body;
+        if (!userId || !title) return res.status(400).json({ error: 'userId and title are required' });
+        
+        await saveTask(userId, { title, deadline, priority });
+        res.status(201).json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.put('/api/tasks/:id/done', async (req, res) => {
+    try {
+        const { id } = req.params;
+        await markDone(id);
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.delete('/api/tasks/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        await deleteTask(id);
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// API Routes for Schedule
+app.get('/api/schedule', async (req, res) => {
+    try {
+        const userId = req.query.userId;
+        if (!userId) return res.status(400).json({ error: 'userId is required' });
+        const schedule = await getSchedule(userId);
+        res.json(schedule);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.post('/api/schedule', async (req, res) => {
+    try {
+        const { userId, day, startTime, endTime, subject, room } = req.body;
+        if (!userId || !day || !startTime || !subject) return res.status(400).json({ error: 'Missing required fields' });
+        
+        await saveSchedule(userId, { day, startTime, endTime, subject, room });
+        res.status(201).json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.delete('/api/schedule/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        await deleteSchedule(id);
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 });
 
 app.listen(PORT, () => {

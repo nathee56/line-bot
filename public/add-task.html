@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เพิ่มงานใหม่ - Chicku Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .radio-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 5px;
+        }
+        .radio-item {
+            flex: 1;
+            position: relative;
+        }
+        .radio-item input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+        }
+        .radio-label {
+            display: block;
+            text-align: center;
+            padding: 10px;
+            border-radius: 15px;
+            border: 2px solid #ddd;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .radio-item input[type="radio"]:checked + .radio-label {
+            border-color: var(--primary);
+            background-color: #FFF3E0;
+            color: var(--primary);
+        }
+
+        .success-message {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        .success-message img {
+            width: 80px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="mascot-header">
+            <h2 class="text-primary">เพิ่มงานใหม่ 📝</h2>
+        </div>
+
+        <div id="form-container" class="card">
+            <form id="add-task-form">
+                <div class="form-group">
+                    <label class="form-label">ชื่องาน</label>
+                    <input type="text" id="title" class="form-control" placeholder="เช่น ซักผ้า, ส่งการบ้าน" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">วันกำหนดส่ง (Deadline)</label>
+                    <input type="datetime-local" id="deadline" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">ความด่วน</label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" name="priority" id="priority-normal" value="🟢 ปกติ" checked>
+                            <label class="radio-label" for="priority-normal">🟢 ปกติ</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" name="priority" id="priority-medium" value="🟡 ปานกลาง">
+                            <label class="radio-label" for="priority-medium">🟡 ปานกลาง</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" name="priority" id="priority-high" value="🔴 ด่วนมาก">
+                            <label class="radio-label" for="priority-high">🔴 ด่วนมาก</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">หมายเหตุ</label>
+                    <textarea id="note" class="form-control" rows="2" placeholder="รายละเอียดเพิ่มเติม..."></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary mt-2">บันทึกงาน</button>
+            </form>
+        </div>
+
+        <div id="success-message" class="card success-message">
+            <img src="https://cdn-icons-png.flaticon.com/512/2663/2663067.png" alt="Chicku">
+            <h3 class="text-success">🐥 Chicku จดให้แล้ว!</h3>
+            <p class="text-muted mt-1">กำลังพากลับไปหน้าหลัก...</p>
+        </div>
+
+    </div>
+
+    <div class="bottom-nav">
+        <a href="index.html" class="nav-item" id="nav-dashboard">
+            <span class="nav-icon">📊</span>
+            Dashboard
+        </a>
+        <a href="add-task.html" class="nav-item active" id="nav-add">
+            <span class="nav-icon">➕</span>
+            เพิ่มงาน
+        </a>
+        <a href="schedule.html" class="nav-item" id="nav-schedule">
+            <span class="nav-icon">📅</span>
+            ตารางเรียน
+        </a>
+    </div>
+
+    <script>
+        const userId = localStorage.getItem('chicku_userId') || 'test_user_123';
+        
+        document.getElementById('nav-dashboard').href = `index.html?userId=${userId}`;
+        document.getElementById('nav-add').href = `add-task.html?userId=${userId}`;
+        document.getElementById('nav-schedule').href = `schedule.html?userId=${userId}`;
+
+        document.getElementById('add-task-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const title = document.getElementById('title').value;
+            const deadlineRaw = document.getElementById('deadline').value;
+            const priority = document.querySelector('input[name="priority"]:checked').value;
+            const note = document.getElementById('note').value;
+            
+            // Format datetime a bit nicer or just send raw to backend
+            // raw: "2023-10-25T14:30" -> replace T with space
+            const deadline = deadlineRaw.replace('T', ' ');
+            const fullTitle = note ? `${title} (${note})` : title;
+
+            try {
+                const res = await fetch('/api/tasks', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId, title: fullTitle, deadline, priority })
+                });
+
+                if (res.ok) {
+                    document.getElementById('form-container').style.display = 'none';
+                    document.getElementById('success-message').style.display = 'block';
+                    
+                    setTimeout(() => {
+                        window.location.href = `index.html?userId=${userId}`;
+                    }, 2000);
+                } else {
+                    alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์');
+            }
+        });
+    </script>
+</body>
+</html>

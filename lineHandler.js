@@ -1,7 +1,13 @@
 const { askAI } = require('./thaillm');
-const { saveTask, markDone, getTasks } = require('./firebase');
+const { saveTask, markDone, getTasks, getSchedule } = require('./firebase');
 const { replyMessage, sendFlexMessage } = require('./lineClient');
-const { createTaskFlex, createTaskListFlex, createGeneralResponseFlex, createSettingsFlex, createNotificationSettingsFlex, createSummaryDashboardFlex } = require('./flexTemplates');
+const { 
+    taskAddedCard, 
+    taskListCard, 
+    completedCard, 
+    scheduleCard, 
+    errorCard 
+} = require('./flexTemplates');
 
 async function handleMessage(event) {
     if (event.type !== 'message' || event.message.type !== 'text') {
@@ -13,8 +19,39 @@ async function handleMessage(event) {
     const replyToken = event.replyToken;
 
     try {
-        // Get existing tasks to provide context to AI if needed, 
-        // or just pass the message to AI to parse intent.
+        console.log(`[Message Received] User: ${userId}, Text: ${userText}`);
+        
+        // 1. Explicit commands bypassing AI (Rich Menu Keywords)
+        if (userText === 'เพิ่มงานใหม่') {
+            return await replyMessage(replyToken, "🐥 ต้องการให้ Chicku ช่วยจำเรื่องอะไรคะ? พิมพ์รายละเอียดงานและวันเวลามาได้เลย! \n\nตัวอย่าง: 'ซักผ้า พรุ่งนี้ 8 โมงเช้า'");
+        }
+
+        if (userText === 'รายการ') {
+            const currentTasks = await getTasks(userId);
+            return await sendFlexMessage(replyToken, "รายการงานของคุณ", taskListCard(currentTasks));
+        }
+
+        if (userText === 'ตารางเรียน') {
+            const schedules = await getSchedule(userId);
+            const currentDay = now.getDay() === 0 ? 7 : now.getDay();
+            const todaySchedules = schedules.filter(s => s.day === currentDay);
+            return await sendFlexMessage(replyToken, "ตารางเรียนวันนี้", scheduleCard(todaySchedules));
+        }
+
+        if (userText.startsWith('เสร็จงาน ')) {
+            const taskTitle = userText.replace('เสร็จงาน ', '');
+            // We need to find the task id. This is a bit hacky but works for simple bot
+            const tasks = await getTasks(userId);
+            const task = tasks.find(t => t.title === taskTitle);
+            if (task) {
+                await markDone(task.id);
+                return await sendFlexMessage(replyToken, "เก่งมาก!", completedCard(task.title));
+            } else {
+                return await sendFlexMessage(replyToken, "อุ๊ปส์!", errorCard("ไม่พบงานที่คุณระบุนะ 🐥"));
+            }
+        }
+
+        // 2. Pass to AI for intent parsing
         const tasks = await getTasks(userId);
         const taskContext = tasks.map((t, i) => `${i + 1}. [${t.id}] ${t.title} (Deadline: ${t.deadline})`).join('\n');
         
@@ -23,62 +60,61 @@ async function handleMessage(event) {
         
         const prompt = `Today is: ${currentDateTimeStr}\nUser ID: ${userId}\nMessage: ${userText}\n\nCurrent Tasks:\n${taskContext || 'No active tasks.'}\n\nPlease parse this message.`;
         
+        console.log('[AI Request] Sending prompt to AI...');
         const aiResponse = await askAI(prompt);
+        console.log('[AI Response]', aiResponse);
+
         let result;
         try {
-            // AI is expected to return JSON string. We might need to clean it if it includes markdown.
             const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
             result = jsonMatch ? JSON.parse(jsonMatch[0]) : null;
         } catch (e) {
             console.error('Failed to parse AI response as JSON:', aiResponse);
         }
 
-        if (!result) {
-            return await sendFlexMessage(replyToken, "บอทไม่เข้าใจ", createGeneralResponseFlex("ขออภัยค่ะ ฉันไม่เข้าใจคำสั่งของคุณ ลองพิมพ์ใหม่อีกครั้งนะคะ"));
+        // 3. Fallback if AI doesn't return JSON
+        if (!result || !result.intent) {
+            // AI returned plain text, just reply directly with 🐥
+            return await replyMessage(replyToken, `🐥 ${aiResponse}`);
         }
 
-        const { intent, task, deadline, doneId, reply } = result;
+        const { intent, task, deadline, priority, doneId, reply } = result;
 
-        // Explicit Command Handling for Rich Menu
-        if (userText === 'เพิ่มงานใหม่') {
-            return await sendFlexMessage(replyToken, "เพิ่มงานใหม่", createGeneralResponseFlex("ต้องการให้ Chicku ช่วยจำเรื่องอะไรคะ? พิมพ์รายละเอียดงานและวันเวลามาได้เลย! \n\nตัวอย่าง: 'ซักผ้า พรุ่งนี้ 8 โมงเช้า'"));
-        }
-        
-        if (userText === 'ตั้งค่าการแจ้งเตือน') {
-            return await sendFlexMessage(replyToken, "ตั้งค่าการแจ้งเตือน", createNotificationSettingsFlex());
-        }
-        
-        if (userText === 'ตั้งค่า') {
-            return await sendFlexMessage(replyToken, "ตั้งค่า", createSettingsFlex());
-        }
-        
-        if (userText === 'สรุปผลงาน') {
-            const currentTasks = await getTasks(userId);
-            const doneCount = 0; // ในอนาคตสามารถนับจาก isDone: true ได้
-            const pendingCount = currentTasks.length;
-            return await sendFlexMessage(replyToken, "สรุปผลงาน", createSummaryDashboardFlex(doneCount, pendingCount));
-        }
+        console.log(`[Intent Parsed] Intent: ${intent}`);
 
-        if (intent === 'list_tasks' || userText.includes('รายการ') || userText.includes('งานทั้งหมด') || userText === 'ขอดูรายการงานทั้งหมด') {
-            const currentTasks = await getTasks(userId);
-            return await sendFlexMessage(replyToken, "รายการงานของคุณ", createTaskListFlex(currentTasks));
-        }
-        
+        // 4. Handle Intents
         if (intent === 'add_task' && (task || result.title)) {
-            const taskTitle = task || result.title || "(ไม่มีหัวข้อ)";
-            const taskDeadline = deadline || result.deadline || "ไม่ระบุ";
-            await saveTask(userId, taskTitle, taskDeadline);
-            return await sendFlexMessage(replyToken, "บันทึกงานใหม่สำเร็จ", createTaskFlex(taskTitle, taskDeadline));
-        } else if (intent === 'mark_done' && doneId) {
-            await markDone(doneId);
-            return await replyMessage(replyToken, reply || "ทำเครื่องหมายว่าเสร็จสิ้นแล้วค่ะ ✅");
+            const taskData = {
+                title: task || result.title || "(ไม่มีหัวข้อ)",
+                deadline: deadline || result.deadline || "ไม่ระบุ",
+                priority: priority || result.priority || "ปกติ"
+            };
+            await saveTask(userId, taskData);
+            return await sendFlexMessage(replyToken, "บันทึกงานใหม่สำเร็จ", taskAddedCard(taskData));
+        } 
+        else if (intent === 'list_tasks') {
+            const currentTasks = await getTasks(userId);
+            return await sendFlexMessage(replyToken, "รายการงานของคุณ", taskListCard(currentTasks));
         }
-
-        await sendFlexMessage(replyToken, "ตอบกลับ", createGeneralResponseFlex(reply || "ดำเนินการเรียบร้อยแล้วค่ะ"));
+        else if (intent === 'mark_done' && doneId) {
+            await markDone(doneId);
+            const doneTask = tasks.find(t => t.id === doneId);
+            return await sendFlexMessage(replyToken, "เก่งมาก!", completedCard(doneTask ? doneTask.title : "งานของคุณ"));
+        }
+        else if (intent === 'today_schedule') {
+            const schedules = await getSchedule(userId);
+            const currentDay = now.getDay() === 0 ? 7 : now.getDay();
+            const todaySchedules = schedules.filter(s => s.day === currentDay);
+            return await sendFlexMessage(replyToken, "ตารางเรียนวันนี้", scheduleCard(todaySchedules));
+        }
+        else {
+            // 'other' intent
+            return await replyMessage(replyToken, `🐥 ${reply || "ว่าไงนะ? Chicku ฟังอยู่จ้า"}`);
+        }
 
     } catch (error) {
         console.error('Error in handleMessage:', error);
-        await sendFlexMessage(replyToken, "เกิดข้อผิดพลาด", createGeneralResponseFlex("เกิดข้อผิดพลาดในการประมวลผล กรุณาลองใหม่อีกครั้งนะคะ 🙏"));
+        await sendFlexMessage(replyToken, "เกิดข้อผิดพลาด", errorCard("ระบบมีปัญหาขัดข้องนิดหน่อย ลองใหม่อีกครั้งนะ 🐥"));
     }
 }
 

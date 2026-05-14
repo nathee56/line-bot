@@ -49,15 +49,19 @@ if (db) {
     db.settings({ ignoreUndefinedProperties: true });
 }
 
-async function saveTask(userId, task) {
+// Tasks Functions
+async function saveTask(userId, taskData) {
     if (!db) throw new Error('Firestore not initialized');
     const newTask = {
         userId,
-        title: task.title,
-        deadline: task.deadline, // Expecting string or Timestamp
+        title: taskData.title,
+        deadline: taskData.deadline || "ไม่ระบุ",
+        priority: taskData.priority || "ปกติ",
         isDone: false,
         notified1day: false,
+        notified3hr: false,
         notified1hr: false,
+        notified30min: false,
         createdAt: admin.firestore.FieldValue.serverTimestamp()
     };
     return await db.collection('tasks').add(newTask);
@@ -79,10 +83,10 @@ async function getUpcomingTasks() {
     const now = new Date();
     const future25h = new Date(now.getTime() + 25 * 60 * 60 * 1000);
     
+    // Simplistic query, you might want to fetch all not done tasks and filter in memory 
+    // if the deadline string format varies too much, or use true Timestamps in Firestore.
     const snapshot = await db.collection('tasks')
         .where('isDone', '==', false)
-        .where('deadline', '>=', now.toISOString()) // Assuming ISO string for simplicity or adjust to Timestamp
-        .where('deadline', '<=', future25h.toISOString())
         .get();
         
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -98,4 +102,43 @@ async function markDone(taskId) {
     return await db.collection('tasks').doc(taskId).update({ isDone: true });
 }
 
-module.exports = { saveTask, getTasks, getUpcomingTasks, updateTask, markDone };
+async function deleteTask(taskId) {
+    if (!db) return;
+    return await db.collection('tasks').doc(taskId).delete();
+}
+
+// Schedule Functions
+async function getSchedule(userId) {
+    if (!db) return [];
+    const snapshot = await db.collection('schedules')
+        .where('userId', '==', userId)
+        .orderBy('day', 'asc')
+        .orderBy('startTime', 'asc')
+        .get();
+    
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+}
+
+async function saveSchedule(userId, data) {
+    if (!db) throw new Error('Firestore not initialized');
+    const newSchedule = {
+        userId,
+        day: parseInt(data.day, 10), // 1-7 (1=Monday... 7=Sunday)
+        startTime: data.startTime,
+        endTime: data.endTime,
+        subject: data.subject,
+        room: data.room || "",
+        createdAt: admin.firestore.FieldValue.serverTimestamp()
+    };
+    return await db.collection('schedules').add(newSchedule);
+}
+
+async function deleteSchedule(scheduleId) {
+    if (!db) return;
+    return await db.collection('schedules').doc(scheduleId).delete();
+}
+
+module.exports = { 
+    saveTask, getTasks, getUpcomingTasks, updateTask, markDone, deleteTask,
+    getSchedule, saveSchedule, deleteSchedule
+};
