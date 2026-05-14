@@ -17,10 +17,16 @@ if (saJson) {
 
 // If JSON parse failed or not provided, try individual variables
 if (!serviceAccount && process.env.FB_PRIVATE_KEY) {
+    let pk = process.env.FB_PRIVATE_KEY;
+    // Remove potential leading/trailing quotes that might come from some env managers
+    pk = pk.replace(/^["']|["']$/g, '');
+    // Ensure newlines are actual newlines
+    pk = pk.replace(/\\n/g, '\n');
+    
     serviceAccount = {
         projectId: process.env.FB_PROJECT_ID,
         clientEmail: process.env.FB_CLIENT_EMAIL,
-        privateKey: process.env.FB_PRIVATE_KEY.replace(/\\n/g, '\n')
+        privateKey: pk
     };
 }
 
