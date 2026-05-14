@@ -3,7 +3,7 @@ const CHICK_ICON = "https://cdn-icons-png.flaticon.com/512/2663/2663067.png"; //
 function createTaskFlex(title, deadline) {
     return {
         type: "bubble",
-        size: "medium",
+        size: "mega",
         header: {
             type: "box",
             layout: "vertical",
