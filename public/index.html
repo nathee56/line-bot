@@ -10,23 +10,26 @@
         .stats-container {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
+            gap: 15px;
+            margin-bottom: 25px;
         }
         .stat-card {
             background: white;
-            border-radius: 15px;
+            border-radius: 20px;
+            border: 2px solid var(--border-light);
+            border-bottom: 5px solid var(--border-light);
             padding: 15px 10px;
             text-align: center;
-            box-shadow: var(--shadow);
+            transition: transform 0.2s;
         }
         .stat-card .num {
-            font-size: 24px;
-            font-weight: bold;
+            font-size: 28px;
+            font-weight: 800;
             color: var(--primary);
         }
         .stat-card .label {
-            font-size: 12px;
+            font-size: 13px;
+            font-weight: 800;
             color: var(--text-muted);
         }
         
@@ -39,24 +42,27 @@
             justify-content: space-between;
         }
         .task-info h4 {
-            margin-bottom: 4px;
+            margin-bottom: 6px;
+            font-size: 18px;
         }
         .task-info .meta {
-            font-size: 12px;
+            font-size: 13px;
             color: var(--text-muted);
+            font-weight: 500;
         }
         .task-actions {
             display: flex;
-            gap: 8px;
+            gap: 10px;
         }
         .empty-state {
             text-align: center;
             padding: 40px 20px;
             color: var(--text-muted);
+            font-weight: 800;
         }
         .empty-state img {
-            width: 80px;
-            opacity: 0.5;
+            width: 90px;
+            opacity: 0.8;
             margin-bottom: 15px;
         }
     </style>
@@ -64,12 +70,13 @@
 <body>
 
     <div class="container">
-        <div class="mascot-header">
-            <img src="https://cdn-icons-png.flaticon.com/512/2663/2663067.png" alt="Chicku">
-            <h2 class="text-primary">Chicku Dashboard</h2>
+        <!-- มาสคอตตรงกลาง -->
+        <div class="mascot-container animate-fade-up">
+            <img src="https://cdn-icons-png.flaticon.com/512/2663/2663067.png" alt="Chicku" class="mascot-img">
+            <h2 class="text-primary mt-1">Chicku Dashboard</h2>
         </div>
 
-        <div class="stats-container">
+        <div class="stats-container animate-fade-up delay-1">
             <div class="stat-card">
                 <div class="num" id="stat-total">0</div>
                 <div class="label">งานทั้งหมด</div>
@@ -84,10 +91,10 @@
             </div>
         </div>
 
-        <h3>รายการงานของคุณ 📋</h3>
-        <div class="task-list" id="task-list">
+        <h3 class="animate-fade-up delay-2">รายการงานของคุณ 📋</h3>
+        <div class="task-list animate-fade-up delay-3" id="task-list">
             <div class="empty-state">
-                <img src="https://cdn-icons-png.flaticon.com/512/2663/2663067.png" alt="Chicku">
+                <img src="https://cdn-icons-png.flaticon.com/512/2663/2663067.png" alt="Chicku" class="mascot-img" style="width: 60px;">
                 <p>กำลังโหลดข้อมูล...</p>
             </div>
         </div>
@@ -178,9 +185,10 @@
             }
 
             let html = '';
-            tasks.forEach(task => {
+            tasks.forEach((task, index) => {
+                const delayClass = `delay-${Math.min(index + 1, 5)}`;
                 html += `
-                    <div class="card task-item" id="task-${task.id}">
+                    <div class="card task-item animate-fade-up ${delayClass}" id="task-${task.id}">
                         <div class="task-info">
                             <h4>${task.title}</h4>
                             <div class="meta">

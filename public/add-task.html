@@ -23,17 +23,22 @@
         .radio-label {
             display: block;
             text-align: center;
-            padding: 10px;
-            border-radius: 15px;
-            border: 2px solid #ddd;
+            padding: 12px 10px;
+            border-radius: 16px;
+            border: 2px solid var(--border-light);
+            border-bottom: 5px solid var(--border-light);
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.1s;
             font-size: 14px;
-            font-weight: bold;
+            font-weight: 800;
+            background-color: white;
+            color: var(--text-muted);
         }
         
         .radio-item input[type="radio"]:checked + .radio-label {
             border-color: var(--primary);
+            border-bottom: 2px solid var(--primary);
+            transform: translateY(3px);
             background-color: #FFF3E0;
             color: var(--primary);
         }
@@ -52,11 +57,12 @@
 <body>
 
     <div class="container">
-        <div class="mascot-header">
-            <h2 class="text-primary">เพิ่มงานใหม่ 📝</h2>
+        <div class="mascot-container animate-fade-up">
+            <img src="https://cdn-icons-png.flaticon.com/512/2663/2663067.png" alt="Chicku" class="mascot-img">
+            <h2 class="text-primary mt-1">เพิ่มงานใหม่ 📝</h2>
         </div>
 
-        <div id="form-container" class="card">
+        <div id="form-container" class="card animate-fade-up delay-1">
             <form id="add-task-form">
                 <div class="form-group">
                     <label class="form-label">ชื่องาน</label>
